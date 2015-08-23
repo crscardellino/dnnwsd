@@ -1,2 +1,2 @@
-# dnnvsd
-Deep Neural Networks for Verb Sense Disambiguation
+# DNNWSD
+Deep Neural Networks for Word Sense Disambiguation
