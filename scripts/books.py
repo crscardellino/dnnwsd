@@ -12,5 +12,5 @@ tree = etree.parse(ifile)
 
 with open(ofile, 'w') as outf:
     outf.write(BeautifulSoup(
-        etree.tostring(tree.find('body')), 'lxml'
-    ).get_text())
+        etree.tostring(tree.find('body'), encoding='UTF-8'), 'lxml'
+    ).get_text().encode('utf-8'))
