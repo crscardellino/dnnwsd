@@ -13,6 +13,6 @@ tree = etree.parse(ifile)
 
 with open(ofile, 'w') as outf:
     for sentence in tree.findall('.//content'):
-        ofile.write(re.sub(r'\s\s+', ' ', BeautifulSoup(
+        outf.write(re.sub(r'\s\s+', ' ', BeautifulSoup(
             etree.tostring(sentence, encoding='UTF-8'), 'lxml'
         ).get_text().replace('\n', ' ').strip()).encode('utf-8'))
