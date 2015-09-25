@@ -11,8 +11,14 @@ ofile = sys.argv[2]
 
 tree = etree.parse(ifile)
 
+sentences = tree.findall(".//content")
+total = len(sentences)
+
 with open(ofile, 'w') as outf:
-    for sentence in tree.findall('.//content'):
+    for idx, sentence in enumerate(sentences):
+        sys.stderr.write('\rParsing sentence {} of {}'.format(idx+1, total))
         outf.write(re.sub(r'\s\s+', ' ', BeautifulSoup(
             etree.tostring(sentence, encoding='UTF-8'), 'lxml'
         ).get_text().replace('\n', ' ').strip()).encode('utf-8'))
+
+print >> sys.stderr
