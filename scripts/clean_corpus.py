@@ -26,4 +26,4 @@ with open(ifile, 'r') as inf:
             outl = outl.replace('9', 'nueve ').strip()
 
             if outl is not "":
-                ofile.write(outl + '\n').encode('utf-8')
+                outf.write(outl.encode('utf-8') + u'\n')
