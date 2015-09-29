@@ -19,6 +19,6 @@ with open(ofile, 'w') as outf:
         sys.stderr.write('\rParsing sentence {} of {}'.format(idx+1, total))
         outf.write(re.sub(r'\s\s+', ' ', BeautifulSoup(
             etree.tostring(sentence, encoding='UTF-8'), 'lxml'
-        ).get_text().replace('\n', ' ').strip()).encode('utf-8'))
+        ).get_text().replace('\n', ' ').strip()).encode('utf-8') + '\n')
 
 print >> sys.stderr
