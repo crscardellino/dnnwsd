@@ -13,7 +13,7 @@ with open(ifile, 'r') as inf:
             if line.strip().startswith("<doc ") or line.strip() == "</doc>":
                 continue
 
-            outl = re.sub(ur'[\W_]+', u' ', line.strip(), flags=re.UNICODE).strip()
+            outl = re.sub(ur'[\W_]+', u' ', line.decode('utf-8').strip(), flags=re.UNICODE).strip()
             outl = outl.replace('0', 'cero ').strip()
             outl = outl.replace('1', 'uno ').strip()
             outl = outl.replace('2', 'dos ').strip()
@@ -26,4 +26,4 @@ with open(ifile, 'r') as inf:
             outl = outl.replace('9', 'nueve ').strip()
 
             if outl is not "":
-                outf.write(outl.encode('utf-8') + u'\n')
+                outf.write(outl.encode('utf-8') + '\n')
