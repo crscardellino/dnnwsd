@@ -10,7 +10,7 @@ ofile = sys.argv[2]
 with open(ifile, 'r') as inf:
     with open(ofile, 'w') as outf:
         for line in inf.readlines():
-            if line.strip().startswith("<doc ") or line.strip() == "</doc>":
+            if line.strip().startswith("<doc ") or line.strip() == "</doc>" or line.strip() == "":
                 continue
 
             outl = re.sub(ur'[\W_]+', u' ', line.decode('utf-8').strip(), flags=re.UNICODE).strip()
@@ -25,5 +25,5 @@ with open(ifile, 'r') as inf:
             outl = outl.replace('8', 'ocho ').strip()
             outl = outl.replace('9', 'nueve ').strip()
 
-            if outl is not "":
+            if outl != "":
                 outf.write(outl.encode('utf-8') + '\n')
