@@ -7,11 +7,18 @@ import sys
 ifile = sys.argv[1]
 ofile = sys.argv[2]
 
+paragraph_flag = True
+
 with open(ifile, 'r') as inf:
     with open(ofile, 'w') as outf:
         for line in inf.readlines():
             if line.strip().startswith("<doc ") or line.strip() == "</doc>" or line.strip() == "":
+                if paragraph_flag:
+                    outf.write('\n')
+                    paragraph_flag = False
                 continue
+
+            paragraph_flag = True
 
             sentences = re.sub(r'\.\s+|\.$', '\n', line.decode('utf-8').strip(), flags=re.UNICODE).strip().split('\n')
 
@@ -32,5 +39,8 @@ with open(ifile, 'r') as inf:
                 outf.write(outl.encode('utf-8'))
                 if idx != len(sentences):
                     outf.write('\n')
+                elif line.endswith('.'):
+                    outf.write('\n')
+                    paragraph_flag = False
                 else:
                     outf.write(' ')
