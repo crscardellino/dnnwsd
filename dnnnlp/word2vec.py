@@ -23,7 +23,7 @@ class CorpusIterator(object):
                 lines = (line.strip() + ' ' for line in f.readlines())
                 corpus = itertools.chain(corpus, lines)
 
-        return [corpus]
+        return [list(corpus)]
 
 
 if __name__ == "__main__":
