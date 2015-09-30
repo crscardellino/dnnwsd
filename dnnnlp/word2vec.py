@@ -3,9 +3,12 @@
 
 import argparse
 import itertools
+import logging
 import os
 import sys
 from gensim.models import Word2Vec
+
+logging.basicConfig(format='%(asctime)s : %(levelname)s : %(message)s', level=logging.INFO)
 
 
 class CorpusIterator(object):
