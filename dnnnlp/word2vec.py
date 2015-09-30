@@ -20,8 +20,7 @@ class CorpusIterator(object):
 
         for fname in os.listdir(self.directory):
             with open(os.path.join(self.directory, fname), "r") as f:
-                lines = (line.strip() + ' ' for line in f.readlines())
-                corpus = itertools.chain(corpus, lines)
+                corpus = itertools.chain(corpus, (word for word in f.read().split()))
 
         return [list(corpus)]
 
