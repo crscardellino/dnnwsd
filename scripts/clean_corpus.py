@@ -22,6 +22,9 @@ with open(ifile, 'r') as inf:
 
             line = re.sub(r'a\s*\.\s*m\s*\.', 'am', line.decode('utf-8').strip(), flags=re.UNICODE).strip()
             line = re.sub(r'p\s*\.\s*m\s*\.', 'pm', line, flags=re.UNICODE).strip()
+            line = line.replace('Srta.', 'Srta')
+            line = line.replace('Sra.', 'Sra')
+            line = line.replace('Sr.', 'Sr')
             sentences = re.sub(r'\.\s+|\.$', '\n', line, flags=re.UNICODE).strip().split('\n')
 
             for idx, sentence in enumerate(sentences, start=1):
