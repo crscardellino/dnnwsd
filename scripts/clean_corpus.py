@@ -7,7 +7,7 @@ import sys
 ifile = sys.argv[1]
 ofile = sys.argv[2]
 
-paragraph_flag = True
+paragraph_flag = False
 
 with open(ifile, 'r') as inf:
     with open(ofile, 'w') as outf:
@@ -20,23 +20,19 @@ with open(ifile, 'r') as inf:
 
             paragraph_flag = True
 
-            sentences = re.sub(r'\.\s+|\.$', '\n', line.decode('utf-8').strip(), flags=re.UNICODE).strip().split('\n')
+            line = re.sub(r'a\s*\.\s*m\s*\.', 'am', line.decode('utf-8').strip(), flags=re.UNICODE).strip()
+            line = re.sub(r'p\s*\.\s*m\s*\.', 'pm', line, flags=re.UNICODE).strip()
+            sentences = re.sub(r'\.\s+|\.$', '\n', line, flags=re.UNICODE).strip().split('\n')
 
             for idx, sentence in enumerate(sentences, start=1):
                 outl = re.sub(r'[\W_]+', ' ', sentence, flags=re.UNICODE).strip()
-                outl = outl.replace('0', 'cero ').strip()
-                outl = outl.replace('1', 'uno ').strip()
-                outl = outl.replace('2', 'dos ').strip()
-                outl = outl.replace('3', 'tres ').strip()
-                outl = outl.replace('4', 'cuatro ').strip()
-                outl = outl.replace('5', 'cinco ').strip()
-                outl = outl.replace('6', 'seis ').strip()
-                outl = outl.replace('7', 'siete ').strip()
-                outl = outl.replace('8', 'ocho ').strip()
-                outl = outl.replace('9', 'nueve ').strip()
+                outl = outl.replace('\d', 'DIGITO ').strip()
                 outl = re.sub(r'\s+', ' ', outl, flags=re.UNICODE)  # Remove double spaces
 
+                outl_size = len(outl.split())
+
                 outf.write(outl.encode('utf-8'))
+
                 if idx != len(sentences):
                     outf.write('\n')
                 elif line.endswith('.'):
