@@ -2,7 +2,6 @@
 # -*- coding: utf-8 -*-
 
 import argparse
-import itertools
 import logging
 import os
 import sys
@@ -15,14 +14,13 @@ class CorpusIterator(object):
     def __init__(self, directory):
         self.directory = directory
 
-    def get_corpus(self):
-        corpus = ()
-
+    def __iter__(self):
         for fname in os.listdir(self.directory):
-            with open(os.path.join(self.directory, fname), "r") as f:
-                corpus = itertools.chain(corpus, (word for word in f.read().split()))
-
-        return [list(corpus)]
+            for line in open(os.path.join(self.directory, fname)):
+                if len(line.split()) < 3:  # Probably is a title or plain noise
+                    continue
+                else:
+                    yield line.split()
 
 
 if __name__ == "__main__":
@@ -67,14 +65,8 @@ if __name__ == "__main__":
         "hs": 0,
     }
 
-    print >> sys.stderr, "Creating Word2Vec model on %s corpus." % sentences.directory
-    model = Word2Vec(**model_config)
-
-    print >> sys.stderr, "Getting vocabulary of the corpus."
-    model.build_vocab(sentences.get_corpus())
-
-    print >> sys.stderr, "Training Word2Vec model of the corpus."
-    model.train(sentences.get_corpus())
+    print >> sys.stderr, "Creating and Training Word2Vec model on %s corpus." % sentences.directory
+    model = Word2Vec(sentences, **model_config)
 
     print >> sys.stderr, "Saving the model in gensim format."
     model.save(args.output + ".gsbin")
