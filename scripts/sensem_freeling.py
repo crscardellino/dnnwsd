@@ -42,7 +42,6 @@ for idx, sentence in enumerate(sentences, start=1):
     sense = u"{}-{}".format(verb, lexical.attrib["sense"])
     senses[sense] += 1
 
-    verb_positions = {(int(vw.attrib["id"]) - 1) for vw in verb_words}
     verb_forms = {vw.text for vw in verb_words}
 
     raw_sentence = re.sub(r'\s\s+', ' ',
@@ -64,10 +63,11 @@ for idx, sentence in enumerate(sentences, start=1):
 
     for widx, word in enumerate(words):
         if word[1] == verb and word[0] in verb_forms:
-            if (widx+sentence_shift) in verb_positions:
+            if not verb_found:
                 word.append("verb")
                 verb_found = True
             else:
+                word.append("verb")
                 print >> sys.stderr, u"Possible conflict in file {} - sentence {} - sense {}".format(
                     verb, verb_id, sense
                 )
