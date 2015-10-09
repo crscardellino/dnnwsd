@@ -57,14 +57,14 @@ for idx, sentence in enumerate(sentences, start=1):
         print >> sys.stderr, pipe_err
         sys.exit(1)
 
-    words = [w.strip().split()[:3] for w in pipe_out.split('\n') if w.strip() != '']
+    words = [w.decode('UTF-8').strip().split()[:3] for w in pipe_out.split('\n') if w.strip() != '']
 
     sentence_shift = len(words) - len(raw_sentence.split())
     verb_found = False
 
     for widx, word in enumerate(words):
         if word[1] == verb and word[0] in verb_forms:
-            if (idx+sentence_shift) in verb_positions:
+            if (widx+sentence_shift) in verb_positions:
                 word.append("verb")
                 verb_found = True
             else:
@@ -79,7 +79,7 @@ for idx, sentence in enumerate(sentences, start=1):
         fout.write("#{} ".format(verb_id) + sense.encode('UTF-8') + '\n')
 
         for word in words:
-            fout.write('\t'.join(word) + '\n')
+            fout.write('\t'.join(word).encode('UTF-8') + '\n')
 
         fout.write('\n')
 
@@ -88,4 +88,4 @@ print >> sys.stderr, "Saving stats of senses"
 
 with open("senses_stats.txt", "w") as fout:
     for sense in sorted(senses):
-        fout.write(u"{} {}".format(sense, senses[sense]))
+        fout.write(u"{} {}\n".format(sense, senses[sense]).encode('UTF-8'))
