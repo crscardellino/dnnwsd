@@ -5,7 +5,8 @@ import os
 import re
 import subprocess
 import sys
-import HTMLParser
+from bs4 import BeautifulSoup
+from collections import defaultdict
 from lxml import etree
 
 FREELING_COMMAND = "analyze -f es.cfg --noloc --noner --nonumb --nodate --noquant".split()
@@ -21,10 +22,11 @@ print >> sys.stderr, "Parsing Corpus"
 sentences = corpus.findall(".//sentence")
 total = len(sentences)
 
-h = HTMLParser.HTMLParser()
+verbs = defaultdict(int)
+senses = defaultdict(int)
 
 for idx, sentence in enumerate(sentences, start=1):
-    sys.stderr.write("\rParsing sentence {} of {}".format(idx, total))
+    print >> sys.stderr, "Parsing sentence {} of {}".format(idx, total)
 
     verb_words = sentence.findall(".//word[@verb='true']")
 
@@ -32,25 +34,21 @@ for idx, sentence in enumerate(sentences, start=1):
         continue
 
     lexical = sentence.find("lexical")
+
     verb = lexical.attrib["verb"]
+    verbs[verb] += 1
+    verb_id = "{:05d}".format(verbs[verb])
+
     sense = u"{}-{}".format(verb, lexical.attrib["sense"])
+    senses[sense] += 1
 
-    verb_positions = [(int(vw.attrib["id"]) - 1) for vw in verb_words]
+    verb_positions = {(int(vw.attrib["id"]) - 1) for vw in verb_words}
+    verb_forms = {vw.text for vw in verb_words}
 
-    raw_sentence = []
-
-    for word in sentence.find("content").findall("word"):
-        token = word.text.decode('UTF-8')
-
-        if re.match(r".*(&[a-z]+;)+.*", token, flags=re.UNICODE):
-            token = h.unescape(token)
-
-        if re.match(r"([\W_]*\w+[\W_]*)+", token, flags=re.UNICODE):
-            token = re.sub(r"[\W_]+", '', token, flags=re.UNICODE)
-
-        raw_sentence.append(token)
-
-    raw_sentence = " ".join(raw_sentence)
+    raw_sentence = re.sub(r'\s\s+', ' ',
+                          BeautifulSoup(
+                              etree.tostring(sentence.find("content"), encoding='UTF-8'), 'lxml'
+                          ).get_text().replace('\n', ' ').strip())
 
     proc = subprocess.Popen(FREELING_COMMAND, stdout=subprocess.PIPE, stdin=subprocess.PIPE, stderr=subprocess.PIPE)
     (pipe_out, pipe_err) = proc.communicate(input=raw_sentence.encode('UTF-8'))
@@ -61,11 +59,24 @@ for idx, sentence in enumerate(sentences, start=1):
 
     words = [w.strip().split()[:3] for w in pipe_out.split('\n') if w.strip() != '']
 
-    for idx in verb_positions:
-        words[idx].append("verb")
+    sentence_shift = len(words) - len(raw_sentence.split())
+    verb_found = False
+
+    for widx, word in enumerate(words):
+        if word[1] == verb and word[0] in verb_forms:
+            if (idx+sentence_shift) in verb_positions:
+                word.append("verb")
+                verb_found = True
+            else:
+                print >> sys.stderr, u"Possible conflict in file {} - sentence {} - sense {}".format(
+                    verb, verb_id, sense
+                )
+
+    if not verb_found:
+        print >> sys.stderr, u"Verb not found in file {} - sentence {} - sense {}".format(verb, verb_id, sense)
 
     with open(os.path.join(output_dir, verb), "a") as fout:
-        fout.write(sense.encode('UTF-8') + '\n')
+        fout.write("#{} ".format(verb_id) + sense.encode('UTF-8') + '\n')
 
         for word in words:
             fout.write('\t'.join(word) + '\n')
@@ -73,3 +84,8 @@ for idx, sentence in enumerate(sentences, start=1):
         fout.write('\n')
 
 print >> sys.stderr, "\nAll corpus parsed"
+print >> sys.stderr, "Saving stats of senses"
+
+with open("senses_stats.txt", "w") as fout:
+    for sense in sorted(senses):
+        fout.write(u"{} {}".format(sense, senses[sense]))
