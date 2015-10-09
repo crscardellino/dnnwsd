@@ -31,7 +31,7 @@ for idx, sentence in enumerate(sentences, start=1):
 
     lexical = sentence.find("lexical")
     verb = lexical.attrib["verb"]
-    sense = "{}-{}".format(verb, lexical.attrib["sense"])
+    sense = u"{}-{}".format(verb, lexical.attrib["sense"])
 
     verb_positions = [(int(vw.attrib["id"]) - 1) for vw in verb_words]
 
@@ -41,7 +41,7 @@ for idx, sentence in enumerate(sentences, start=1):
                           ).get_text().replace('\n', ' ').strip())
 
     proc = subprocess.Popen(FREELING_COMMAND, stdout=subprocess.PIPE, stdin=subprocess.PIPE, stderr=subprocess.PIPE)
-    (pipe_out, pipe_err) = proc.communicate(input=raw_sentence)
+    (pipe_out, pipe_err) = proc.communicate(input=raw_sentence.encode('UTF-8'))
 
     if pipe_err.strip() != '':
         print >> sys.stderr, pipe_err
@@ -56,7 +56,7 @@ for idx, sentence in enumerate(sentences, start=1):
         fout.write(sense.encode('UTF-8') + '\n')
 
         for word in words:
-            fout.write('\t'.join(word).encode('UTF-8') + '\n')
+            fout.write('\t'.join(word) + '\n')
 
         fout.write('\n')
 
