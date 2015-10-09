@@ -37,7 +37,7 @@ for idx, sentence in enumerate(sentences, start=1):
 
     raw_sentence = re.sub(r'\s\s+', ' ',
                           BeautifulSoup(
-                              etree.tostring(sentence, encoding='UTF-8'), 'lxml'
+                              etree.tostring(sentence.find("content"), encoding='UTF-8'), 'lxml'
                           ).get_text().replace('\n', ' ').strip())
 
     proc = subprocess.Popen(FREELING_COMMAND, stdout=subprocess.PIPE, stdin=subprocess.PIPE, stderr=subprocess.PIPE)
