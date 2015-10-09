@@ -5,7 +5,7 @@ import os
 import re
 import subprocess
 import sys
-from bs4 import BeautifulSoup
+import HTMLParser
 from lxml import etree
 
 FREELING_COMMAND = "analyze -f es.cfg --noloc --noner --nonumb --nodate --noquant".split()
@@ -21,6 +21,8 @@ print >> sys.stderr, "Parsing Corpus"
 sentences = corpus.findall(".//sentence")
 total = len(sentences)
 
+h = HTMLParser.HTMLParser()
+
 for idx, sentence in enumerate(sentences, start=1):
     sys.stderr.write("\rParsing sentence {} of {}".format(idx, total))
 
@@ -35,10 +37,20 @@ for idx, sentence in enumerate(sentences, start=1):
 
     verb_positions = [(int(vw.attrib["id"]) - 1) for vw in verb_words]
 
-    raw_sentence = re.sub(r'\s\s+', ' ',
-                          BeautifulSoup(
-                              etree.tostring(sentence.find("content"), encoding='UTF-8'), 'lxml'
-                          ).get_text().replace('\n', ' ').strip())
+    raw_sentence = []
+
+    for word in sentence.find("content").findall("word"):
+        token = word.text.decode('UTF-8')
+
+        if re.match(r".*(&[a-z]+;)+.*", token, flags=re.UNICODE):
+            token = h.unescape(token)
+
+        if re.match(r"([\W_]*\w+[\W_]*)+", token, flags=re.UNICODE):
+            token = re.sub(r"[\W_]+", '', token, flags=re.UNICODE)
+
+        raw_sentence.append(token)
+
+    raw_sentence = " ".join(raw_sentence)
 
     proc = subprocess.Popen(FREELING_COMMAND, stdout=subprocess.PIPE, stdin=subprocess.PIPE, stderr=subprocess.PIPE)
     (pipe_out, pipe_err) = proc.communicate(input=raw_sentence.encode('UTF-8'))
