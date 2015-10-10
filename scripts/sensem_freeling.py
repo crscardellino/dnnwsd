@@ -28,8 +28,7 @@ senses = defaultdict(int)
 for idx, sentence in enumerate(sentences, start=1):
     print >> sys.stderr, "Parsing sentence {} of {}".format(idx, total)
 
-    verb_words = sentence.findall(".//word[@verb='true']")
-
+    sentence_id = sentence.attrib["id"]
     lexical = sentence.find("lexical")
 
     verb = lexical.attrib["verb"]
@@ -39,7 +38,7 @@ for idx, sentence in enumerate(sentences, start=1):
     sense = u"{}-{}".format(verb, lexical.attrib["sense"])
     senses[sense] += 1
 
-    verb_forms = {vw.text for vw in verb_words}
+    verb_forms = {vw.text for vw in sentence.findall(".//word[@verb='true']")}
 
     raw_sentence = re.sub(r'\s\s+', ' ',
                           BeautifulSoup(
@@ -55,7 +54,6 @@ for idx, sentence in enumerate(sentences, start=1):
 
     words = [w.decode('UTF-8').strip().split()[:3] for w in pipe_out.split('\n') if w.strip() != '']
 
-    sentence_shift = len(words) - len(raw_sentence.split())
     verb_found = False
 
     for widx, word in enumerate(words):
@@ -65,12 +63,13 @@ for idx, sentence in enumerate(sentences, start=1):
                 verb_found = True
             else:
                 word.append("verb")
-                print >> sys.stderr, u"Possible conflict in file {} - sentence {} - sense {}".format(
-                    verb, verb_id, sense
-                ).encode('UTF-8')
+                print >> sys.stderr, \
+                    u"Possible conflict in file {} - sentence {} - sense {} - corpus sentence {}".format(
+                        verb, verb_id, sense, sentence_id).encode('UTF-8')
 
     if not verb_found:
-        print >> sys.stderr, u"Verb not found in file {} - sentence {} - sense {}".format(verb, verb_id, sense).encode('UTF-8')
+        print >> sys.stderr, u"Verb not found in file {} - sentence {} - sense {} - corpus sentence".format(
+            verb, verb_id, sense, sentence_id).encode('UTF-8')
 
     with open(os.path.join(output_dir, verb), "a") as fout:
         fout.write("#{} ".format(verb_id) + sense.encode('UTF-8') + '\n')
