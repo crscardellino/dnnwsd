@@ -30,9 +30,6 @@ for idx, sentence in enumerate(sentences, start=1):
 
     verb_words = sentence.findall(".//word[@verb='true']")
 
-    if len(verb_words) == 0:
-        continue
-
     lexical = sentence.find("lexical")
 
     verb = lexical.attrib["verb"]
@@ -70,10 +67,10 @@ for idx, sentence in enumerate(sentences, start=1):
                 word.append("verb")
                 print >> sys.stderr, u"Possible conflict in file {} - sentence {} - sense {}".format(
                     verb, verb_id, sense
-                )
+                ).encode('UTF-8')
 
     if not verb_found:
-        print >> sys.stderr, u"Verb not found in file {} - sentence {} - sense {}".format(verb, verb_id, sense)
+        print >> sys.stderr, u"Verb not found in file {} - sentence {} - sense {}".format(verb, verb_id, sense).encode('UTF-8')
 
     with open(os.path.join(output_dir, verb), "a") as fout:
         fout.write("#{} ".format(verb_id) + sense.encode('UTF-8') + '\n')
