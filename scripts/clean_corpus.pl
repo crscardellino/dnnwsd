@@ -6,15 +6,15 @@ use warnings;
 my $idir = shift @ARGV;
 my $odir = shift @ARGV;
 
-my @files = `find $idir -type f -name "*.xml"`;
+my @files = `find $idir -type f -name "*.txt"`;
 chomp @files;
 
 foreach my $ifile (@files) {
   print STDERR "Parsing $ifile\n";
 
-  $ifile =~ m/.+\/([^\/]+)\.xml$/;
+  $ifile =~ m/.+\/([^\/]+)\.txt$/;
   my $ofile = $odir . "/" . $1 . ".txt";
 
-  my $rc = system "python books.py $ifile $ofile";
-  die "Error running books.py on $ifile: $!" if ($rc >> 8) != 0;
+  my $rc = system "python clean_corpus.py $ifile $ofile";
+  die "Error running clean_corpus.py on $ifile: $!" if ($rc >> 8) != 0;
 }

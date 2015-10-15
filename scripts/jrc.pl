@@ -15,6 +15,6 @@ foreach my $ifile (@files) {
   $ifile =~ m/.+\/([^\/]+)\.xml$/;
   my $ofile = $odir . "/" . $1 . ".txt";
 
-  my $rc = system "python books.py $ifile $ofile";
-  die "Error running books.py on $ifile: $!" if ($rc >> 8) != 0;
+  my $rc = system "python jrc.py $ifile $ofile";
+  die "Error running jrc.py on $ifile: $!" if ($rc >> 8) != 0;
 }
