@@ -11,7 +11,7 @@ setup_logging()
 logger = logging.getLogger(__name__)
 
 
-def get_word_from_line(line):
+def _get_word_from_line(line):
     word_info = line.split()
 
     return Word(word_info[1], idx=int(word_info[0])-1, tag=word_info[3][:2], lemma=word_info[2])
@@ -56,7 +56,7 @@ class SenSemLemmaCorpus(object):
                             .format(sense_info[0], self.lemma, sense_info[1]).encode("utf-8"))
                 continue
 
-            words = map(get_word_from_line, filter(lambda l: len(l.split()) == 4, sentence))
+            words = map(_get_word_from_line, filter(lambda l: len(l.split()) == 4, sentence))
 
             self.sentences.append(Sentence(words, int(sense_info[2])-1, sense_info[1]))
             self.senses[sense_info[1]] += 1
