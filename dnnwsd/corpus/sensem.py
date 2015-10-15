@@ -4,7 +4,7 @@ import logging
 import os
 import re
 from collections import defaultdict
-from .tokens import Word, Sentence
+from .base import Word, Sentence, Corpus
 from ..utils.setup_logging import setup_logging
 
 setup_logging()
@@ -17,10 +17,7 @@ def _get_word_from_line(line):
     return Word(word_info[1], idx=int(word_info[0])-1, tag=word_info[3][:2], lemma=word_info[2])
 
 
-class SenSemCorpus(object):
-    def __init__(self, corpus_dir):
-        self.corpus_dir = corpus_dir
-
+class SenSemCorpus(Corpus):
     def __iter__(self):
         for fname in os.listdir(self.corpus_dir):
             fpath = os.path.join(self.corpus_dir, fname).decode("utf-8")

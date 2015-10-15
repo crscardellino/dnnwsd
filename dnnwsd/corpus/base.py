@@ -34,3 +34,11 @@ class Sentence(object):
     def tokens(self):
         for word in self:
             yield word.token
+
+
+class Corpus(object):
+    def __init__(self, corpus_dir):
+        self.corpus_dir = corpus_dir
+
+    def __iter__(self):
+        raise NotImplementedError
