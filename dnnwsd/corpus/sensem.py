@@ -4,7 +4,7 @@ import logging
 import os
 import re
 from collections import defaultdict
-from .base import Word, Sentence, Corpus
+from .base import Word, Sentence, Corpus, CorpusDirectoryIterator
 from ..utils.setup_logging import setup_logging
 
 setup_logging()
@@ -17,7 +17,7 @@ def _get_word_from_line(line):
     return Word(word_info[1], idx=int(word_info[0])-1, tag=word_info[3][:2], lemma=word_info[2])
 
 
-class SenSemCorpus(Corpus):
+class SenSemCorpusDirectoryIterator(CorpusDirectoryIterator):
     def __iter__(self):
         for fname in os.listdir(self.corpus_dir):
             fpath = os.path.join(self.corpus_dir, fname).decode("utf-8")
@@ -25,15 +25,15 @@ class SenSemCorpus(Corpus):
 
             logger.info(u"Getting corpus from lemma {}".format(lemma).encode("utf-8"))
 
-            yield SenSemLemmaCorpus(lemma, fpath)
+            yield SenSemCorpus(lemma, fpath)
 
 
-class SenSemLemmaCorpus(object):
+class SenSemCorpus(Corpus):
     def __init__(self, lemma, fpath):
-        assert isinstance(lemma, unicode) and isinstance(fpath, unicode)
+        assert isinstance(fpath, unicode)
 
-        self.lemma = lemma
-        self.sentences = []
+        super(SenSemCorpus, self).__init__(lemma)
+
         self.senses = defaultdict(int)
 
         logger.info(u"Reading sentences from file {}".format(fpath).encode("utf-8"))
@@ -59,10 +59,6 @@ class SenSemLemmaCorpus(object):
             self.senses[sense_info[1]] += 1
 
         logger.info(u"All sentences parsed in file {}".format(fpath).encode("utf-8"))
-
-    def __iter__(self):
-        for sentence in self.sentences:
-            yield sentence
 
     def has_multiple_senses(self):
         return len(self.senses) > 1

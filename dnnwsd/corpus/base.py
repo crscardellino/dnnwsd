@@ -36,9 +36,21 @@ class Sentence(object):
             yield word.token
 
 
-class Corpus(object):
+class CorpusDirectoryIterator(object):
     def __init__(self, corpus_dir):
         self.corpus_dir = corpus_dir
 
     def __iter__(self):
         raise NotImplementedError
+
+
+class Corpus(object):
+    def __init__(self, lemma):
+        assert isinstance(lemma, unicode)
+
+        self.lemma = lemma
+        self.sentences = []
+
+    def __iter__(self):
+        for sentence in self.sentences:
+            yield sentence
