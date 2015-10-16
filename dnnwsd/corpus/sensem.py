@@ -29,7 +29,7 @@ class SenSemCorpusDirectoryIterator(CorpusDirectoryIterator):
 
 
 class SenSemCorpus(Corpus):
-    def __init__(self, lemma, fpath):
+    def __init__(self, lemma, fpath, sense_filter=3):
         assert isinstance(fpath, unicode)
 
         super(SenSemCorpus, self).__init__(lemma)
@@ -58,13 +58,18 @@ class SenSemCorpus(Corpus):
             self.sentences.append(Sentence(words, int(sense_info[2])-1, sense_info[1]))
             self.senses[sense_info[1]] += 1
 
+        if sense_filter > 1:
+            logger.info(u"Filtering senses with less than {} instances in file {}".format(
+                sense_filter, fpath).encode("utf-8")
+            )
+
+            self.senses = {sense: count for sense, count in self.senses.iteritems() if count >= sense_filter}
+            self.sentences = filter(lambda s: s.sense in self.senses, self.sentences)
+
         logger.info(u"All sentences parsed in file {}".format(fpath).encode("utf-8"))
 
     def has_multiple_senses(self):
         return len(self.senses) > 1
 
-    def get_filtered_senses(self, sense_filter=3):
-        return ((sense, count) for sense, count in self.senses.iteritems() if count >= sense_filter)
-
-    def get_filtered_sentences(self, sense_filter=3):
-        return (sentence for sentence in self if self.senses[sentence.sense] >= sense_filter)
+    def get_senses(self):
+        return ((sense, count) for sense, count in self.senses.iteritems())
