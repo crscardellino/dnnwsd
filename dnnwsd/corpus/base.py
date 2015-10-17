@@ -60,10 +60,6 @@ class Sentence(object):
     def predicate(self):
         return self._words[self.predicate_index]
 
-    def tokens(self):
-        for word in self:
-            yield word.token
-
 
 class CorpusDirectoryIterator(object):
     def __init__(self, corpus_dir):
@@ -99,3 +95,17 @@ class Corpus(object):
 
     def __len__(self):
         return len(self._sentences)
+
+    def tokens(self, window_size=None):
+        """
+        Method to return all the tokens for every predicate window of every sentence.
+        Useful to get collocations.
+        :param window_size: Size of the window. If None, return all tokens in the sentence.
+        :return: A list of the tokens.
+        """
+
+        for sentence in self:
+            window_size = len(sentence) if window_size is None else window_size
+
+            for word in sentence.predicate_window(window_size):
+                yield word.token

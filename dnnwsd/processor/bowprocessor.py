@@ -12,7 +12,7 @@ logger = logging.getLogger(__name__)
 
 
 class BoWProcessor(BaseProcessor):
-    def __init__(self, corpus, vocabulary_filter=2, window_size=2):
+    def __init__(self, corpus, vocabulary_filter=2, window_size=5):
         super(BoWProcessor, self).__init__(corpus)
         self.vocabulary_filter = vocabulary_filter
         self.window_size = window_size
@@ -62,9 +62,9 @@ class BoWProcessor(BaseProcessor):
 
 
 class BoPoSProcessor(BoWProcessor):
-    def __init__(self, corpus, vocabulary_filter=2, window_size=2, pos_filter=2):
-        self.pos_filter = pos_filter
-        super(BoPoSProcessor, self).__init__(corpus, vocabulary_filter, window_size)
+    def __init__(self, *args, **kwargs):
+        self.pos_filter = kwargs.pop('pos_filter', 2)
+        super(BoPoSProcessor, self).__init__(*args, **kwargs)
 
     def _get_corpus_features(self):
         super(BoPoSProcessor, self)._get_corpus_features()
