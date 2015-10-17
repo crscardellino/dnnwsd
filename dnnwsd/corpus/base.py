@@ -2,13 +2,26 @@
 
 
 class Word(object):
-    def __init__(self, token, idx=None, tag=None, lemma=None):
+    def __init__(self, token, tag=None, lemma=None, is_main_verb=False):
         assert isinstance(token, unicode) and (lemma is None or isinstance(lemma, unicode))
 
         self.token = token
-        self.idx = idx
         self.tag = tag
         self.lemma = lemma
+        self.is_main_verb = is_main_verb
+
+    def __unicode__(self):
+        tag = self.tag if self.tag else u""
+        lemma = self.lemma if self.lemma else u""
+        verb = u"verb" if self.is_main_verb else u""
+
+        return u"{} {} {} {}".format(self.token, lemma, tag, verb).strip()
+
+    def __str__(self):
+        return unicode(self).encode("utf-8")
+
+    def __repr__(self):
+        return str(self)
 
 
 class Sentence(object):
@@ -25,6 +38,15 @@ class Sentence(object):
 
     def __getitem__(self, item):
         return self._words[item]
+
+    def __unicode__(self):
+        return "\n".join(map(lambda (i, w): u"{:03d} {}".format(i, unicode(w)), enumerate(self)))
+
+    def __str__(self):
+        return unicode(self).decode("utf-8")
+
+    def __repr__(self):
+        return str(self)
 
     def predicate_window(self, window_size):
         start = max(0, self.predicate_index - window_size)
@@ -54,8 +76,11 @@ class Corpus(object):
 
         self.lemma = lemma
         self.sentences = []
-        """:type : list of Sentence"""
+        """:type : list of dnnwsd.corpus.base.Sentence"""
 
     def __iter__(self):
         for sentence in self.sentences:
             yield sentence
+
+    def __getitem__(self, item):
+        return self.sentences[item]

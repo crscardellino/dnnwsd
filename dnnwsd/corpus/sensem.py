@@ -11,10 +11,17 @@ setup_logging()
 logger = logging.getLogger(__name__)
 
 
-def _get_word_from_line(line):
+def _get_word(line):
+    word_info = line.split()
+    is_main_verb = len(word_info) == 5 and word_info[4] == u'verb'
+
+    return Word(word_info[1], tag=word_info[3][:2], lemma=word_info[2], is_main_verb=is_main_verb)
+
+
+def _filter_symbols(line):
     word_info = line.split()
 
-    return Word(word_info[1], idx=int(word_info[0])-1, tag=word_info[3][:2], lemma=word_info[2])
+    return len(word_info) > 3 and not word_info[3].startswith("F")
 
 
 class SenSemCorpusDirectoryIterator(CorpusDirectoryIterator):
@@ -40,7 +47,7 @@ class SenSemCorpus(Corpus):
 
         with open(fpath, "r") as f:
             raw_sentences = f.read().decode("utf-8")
-            raw_sentences = re.sub(r"\n\n\n+", "\n\n", raw_sentences, flags=re.UNICODE).split("\n\n")
+            raw_sentences = re.sub(r"\n\n\n+", "\n\n", raw_sentences.strip(), flags=re.UNICODE).split("\n\n")
 
         logger.info(u"Parsing sentences from file {}".format(fpath).encode("utf-8"))
 
@@ -53,9 +60,10 @@ class SenSemCorpus(Corpus):
                             .format(sense_info[0], self.lemma, sense_info[1]).encode("utf-8"))
                 continue
 
-            words = map(_get_word_from_line, filter(lambda l: len(l.split()) == 4, sentence))
+            words = map(_get_word, filter(_filter_symbols, sentence))
+            predicate_index = map(lambda w: w.is_main_verb, words).index(True)
 
-            self.sentences.append(Sentence(words, int(sense_info[2])-1, sense_info[1]))
+            self.sentences.append(Sentence(words, predicate_index, sense_info[1]))
             self.senses[sense_info[1]] += 1
 
         if sense_filter > 1:
