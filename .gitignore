@@ -64,3 +64,8 @@ resources/
 
 # PyCharms
 .idea/
+
+# iPython Notebook and other test related stuff
+/test.ipynb
+/test.py
+.ipynb_checkpoints/
