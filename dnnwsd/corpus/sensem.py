@@ -63,7 +63,7 @@ class SenSemCorpus(Corpus):
             words = map(_get_word, filter(_filter_symbols, sentence))
             predicate_index = map(lambda w: w.is_main_verb, words).index(True)
 
-            self.sentences.append(Sentence(words, predicate_index, sense_info[1]))
+            self._sentences.append(Sentence(words, predicate_index, sense_info[1]))
             self.senses[sense_info[1]] += 1
 
         if sense_filter > 1:
@@ -72,7 +72,7 @@ class SenSemCorpus(Corpus):
             )
 
             self.senses = {sense: count for sense, count in self.senses.iteritems() if count >= sense_filter}
-            self.sentences = filter(lambda s: s.sense in self.senses, self.sentences)
+            self._sentences = filter(lambda s: s.sense in self.senses, self._sentences)
 
         logger.info(u"All sentences parsed in file {}".format(fpath).encode("utf-8"))
 

@@ -43,10 +43,13 @@ class Sentence(object):
         return "\n".join(map(lambda (i, w): u"{:03d} {}".format(i, unicode(w)), enumerate(self)))
 
     def __str__(self):
-        return unicode(self).decode("utf-8")
+        return unicode(self).encode("utf-8")
 
     def __repr__(self):
         return str(self)
+
+    def __len__(self):
+        return len(self._words)
 
     def predicate_window(self, window_size):
         start = max(0, self.predicate_index - window_size)
@@ -75,12 +78,24 @@ class Corpus(object):
         assert isinstance(lemma, unicode)
 
         self.lemma = lemma
-        self.sentences = []
+        self._sentences = []
         """:type : list of dnnwsd.corpus.base.Sentence"""
 
     def __iter__(self):
-        for sentence in self.sentences:
+        for sentence in self._sentences:
             yield sentence
 
     def __getitem__(self, item):
-        return self.sentences[item]
+        return self._sentences[item]
+
+    def __unicode__(self):
+        return "\n\n".join(map(lambda s: unicode(s), self._sentences))
+
+    def __str__(self):
+        return unicode(self).encode("utf-8")
+
+    def __repr__(self):
+        return str(self)
+
+    def __len__(self):
+        return len(self._sentences)
