@@ -16,10 +16,13 @@ class BoWProcessor(BaseProcessor):
         super(BoWProcessor, self).__init__(corpus)
         self.vocabulary_filter = vocabulary_filter
         self.window_size = window_size
+        self.features = None
+        """:type : numpy.ndarrray"""
+
         self._get_corpus_features()
 
     def _get_corpus_features(self):
-        logger.info(u"Getting the vocabulary of the corpus from lemma {}".format(self.corpus.lemma).encode("utf-8"))
+        logger.info(u"Getting the vocabulary from the corpus of lemma {}".format(self.corpus.lemma).encode("utf-8"))
 
         vocabulary = defaultdict(int)
 
@@ -27,7 +30,7 @@ class BoWProcessor(BaseProcessor):
             for word in sentence.predicate_window(self.window_size):
                 vocabulary[word.token] += 1
 
-        logger.info(u"Filtering the vocabulary of the corpus from lemma {}".format(self.corpus.lemma).encode("utf-8"))
+        logger.info(u"Filtering the vocabulary from the corpus of lemma {}".format(self.corpus.lemma).encode("utf-8"))
 
         self.features = \
             np.sort(np.array([word for word, count in vocabulary.iteritems() if count >= self.vocabulary_filter]))
@@ -38,6 +41,9 @@ class BoWProcessor(BaseProcessor):
     def instances(self):
         dataset = []
         target = []
+
+        logger.info(u"Getting corpus dataset and target from sentences from the corpus of lemma {}"
+                    .format(self.corpus.lemma).encode("utf-8"))
 
         for sentence in self.corpus:
             # Get the data (depends on the processor's class)
@@ -57,6 +63,9 @@ class BoWProcessor(BaseProcessor):
             dataset.append(instance_features)
             target.append(self.labels.index(sentence.sense))
 
+        logger.info(u"Dataset and target obtainded from the corpus of lemma {}"
+                    .format(self.corpus.lemma).encode("utf-8"))
+
         self.dataset = sparse.csr_matrix(np.vstack(dataset))
         self.target = np.array(target, dtype=np.int32)
 
@@ -69,7 +78,7 @@ class BoPoSProcessor(BoWProcessor):
     def _get_corpus_features(self):
         super(BoPoSProcessor, self)._get_corpus_features()
 
-        logger.info(u"Getting the part of speech tags of the corpus from lemma {}"
+        logger.info(u"Getting the part of speech tags from the corpus of lemma {}"
                     .format(self.corpus.lemma).encode("utf-8"))
 
         postags = defaultdict(int)
@@ -78,7 +87,7 @@ class BoPoSProcessor(BoWProcessor):
             for widx, word in enumerate(sentence.predicate_window(self.window_size)):
                 postags[self._get_tag_literal(word, widx)] += 1
 
-        logger.info(u"Filtering the part of speech tags of the corpus from lemma {}"
+        logger.info(u"Filtering the part of speech tags from the corpus of lemma {}"
                     .format(self.corpus.lemma).encode("utf-8"))
 
         self.features = \
