@@ -14,13 +14,12 @@ logger = logging.getLogger(__name__)
 class WordVectorsProcessor(BaseProcessor):
     def __init__(self, corpus, word2vec_model_path, window_size=5):
         assert window_size > 0
-        super(WordVectorsProcessor, self).__init__(corpus)
+        super(WordVectorsProcessor, self).__init__(corpus, window_size)
 
         logger.info("Loading Wor2Vec model from {}".format(word2vec_model_path))
         self.word2vec_model = gensim.models.Word2Vec.load_word2vec_format(word2vec_model_path, binary=True)
         logger.info("Finished loading Word2Vec model")
 
-        self.window_size = window_size
         self.vector_size = self.word2vec_model.vector_size
         self.features_dimension = self.vector_size * (self.window_size * 2 + 1)
 

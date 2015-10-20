@@ -13,10 +13,9 @@ logger = logging.getLogger(__name__)
 
 class BoWProcessor(BaseProcessor):
     def __init__(self, corpus, vocabulary_filter=2, window_size=5):
-        super(BoWProcessor, self).__init__(corpus)
-        self.vocabulary_filter = vocabulary_filter
-        self.window_size = window_size
-        self.features = None
+        super(BoWProcessor, self).__init__(corpus, window_size)
+        self._vocabulary_filter = vocabulary_filter
+        self._features = None
         """:type : numpy.ndarrray"""
 
         self._get_corpus_features()
@@ -32,8 +31,8 @@ class BoWProcessor(BaseProcessor):
 
         logger.info(u"Filtering the vocabulary from the corpus of lemma {}".format(self.corpus.lemma).encode("utf-8"))
 
-        self.features = \
-            np.sort(np.array([word for word, count in vocabulary.iteritems() if count >= self.vocabulary_filter]))
+        self._features = \
+            np.sort(np.array([word for word, count in vocabulary.iteritems() if count >= self._vocabulary_filter]))
 
     def _get_instance_data(self, sentence):
         return np.array([word.token for word in sentence.predicate_window(self.window_size)])
@@ -51,14 +50,14 @@ class BoWProcessor(BaseProcessor):
 
             # Get the indices of every word in the vocabulary (that was not filtered)
             instance_features = np.searchsorted(
-                self.features, instance_features[np.in1d(instance_features, self.features)]
+                self._features, instance_features[np.in1d(instance_features, self._features)]
             )
 
             # Counts the amounts
             instance_features = np.bincount(instance_features).astype(np.int32)
 
             # Resize to match the features shape
-            instance_features.resize(self.features.shape)
+            instance_features.resize(self._features.shape)
 
             dataset.append(instance_features)
             target.append(self.labels.index(sentence.sense))
@@ -90,9 +89,9 @@ class BoPoSProcessor(BoWProcessor):
         logger.info(u"Filtering the part of speech tags from the corpus of lemma {}"
                     .format(self.corpus.lemma).encode("utf-8"))
 
-        self.features = \
+        self._features = \
             np.hstack((
-                self.features,
+                self._features,
                 np.sort(np.array([pos for pos, count in postags.iteritems() if count >= self.pos_filter]))
             ))
 
