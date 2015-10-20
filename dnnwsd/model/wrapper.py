@@ -16,7 +16,6 @@ class SKLearnWrapperModel(BaseModel):
         self._model = sklearn_model_class(**sklearn_model_parameters)
 
     def fit(self, X, y):
-        logger.info("Fitting the classifier {}".format(self._model.__class__.__name__))
         self._model.fit(X, y)
 
     def predict(self, X):
