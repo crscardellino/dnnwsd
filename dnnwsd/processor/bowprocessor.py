@@ -2,9 +2,11 @@
 
 import logging
 import numpy as np
+
 from collections import defaultdict
 from scipy import sparse
 from .base import BaseProcessor
+
 from ..utils.setup_logging import setup_logging
 
 setup_logging()
@@ -12,6 +14,8 @@ logger = logging.getLogger(__name__)
 
 
 class BoWProcessor(BaseProcessor):
+    name = u"Bag of Words Processor"
+
     def __init__(self, corpus, vocabulary_filter=2, window_size=5):
         super(BoWProcessor, self).__init__(corpus, window_size)
         self._vocabulary_filter = vocabulary_filter
@@ -37,7 +41,14 @@ class BoWProcessor(BaseProcessor):
     def _get_instance_data(self, sentence):
         return np.array([word.token for word in sentence.predicate_window(self.window_size)])
 
-    def instances(self):
+    def instances(self, force=False):
+        if self.dataset and self.target and not force:
+            logger.warn(
+                u"The corpus dataset and target are already existent and will not be overwritten. " +
+                u"To force overwrite use the method with force == True"
+            )
+            return
+
         dataset = []
         target = []
 
@@ -70,6 +81,8 @@ class BoWProcessor(BaseProcessor):
 
 
 class BoPoSProcessor(BoWProcessor):
+    name = u"Bag of Part-of-Speech Processor"
+
     def __init__(self, *args, **kwargs):
         self.pos_filter = kwargs.pop('pos_filter', 2)
         super(BoPoSProcessor, self).__init__(*args, **kwargs)
@@ -112,5 +125,7 @@ class BoPoSProcessor(BoWProcessor):
 
 
 class PoSProcessor(BoPoSProcessor):
+    name = u"Part-of-Speech with Positions Processor"
+
     def _get_tag_literal(self, *args):
         return u"{}{:+d}".format(args[0].tag, args[1]-self.window_size)

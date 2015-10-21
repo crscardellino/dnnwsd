@@ -3,7 +3,9 @@
 import gensim
 import logging
 import numpy as np
+
 from scipy import sparse
+
 from .base import BaseProcessor
 from ..utils.setup_logging import setup_logging
 
@@ -12,6 +14,8 @@ logger = logging.getLogger(__name__)
 
 
 class WordVectorsProcessor(BaseProcessor):
+    name = u"Word Vectors Processor"
+
     def __init__(self, corpus, word2vec_model_path, window_size=5):
         assert window_size > 0
         super(WordVectorsProcessor, self).__init__(corpus, window_size)
@@ -48,7 +52,14 @@ class WordVectorsProcessor(BaseProcessor):
 
         return window_vector
 
-    def instances(self):
+    def instances(self, force=False):
+        if self.dataset and self.target and not force:
+            logger.warn(
+                u"The corpus dataset and target are already existent and will not be overwritten. " +
+                u"To force overwrite use the method with force == True"
+            )
+            return
+
         dataset = []
         target = []
 
