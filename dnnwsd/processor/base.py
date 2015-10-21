@@ -4,6 +4,8 @@ import numpy as np
 
 
 class BaseProcessor(object):
+    name = u"Base Processor"
+
     def __init__(self, corpus, window_size=5):
         self.corpus = corpus
         """:type : dnnwsd.corpus.base.Corpus"""
