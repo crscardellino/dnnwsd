@@ -1,9 +1,12 @@
 # -*- coding: utf-8 -*-
 
+import cPickle as pickle
 import logging
 import os
 import re
+
 from collections import defaultdict
+
 from .base import Word, Sentence, Corpus, CorpusDirectoryIterator
 from ..utils.setup_logging import setup_logging
 
@@ -26,13 +29,16 @@ def _filter_symbols(line):
 
 class SenSemCorpusDirectoryIterator(CorpusDirectoryIterator):
     def __iter__(self):
-        for fname in os.listdir(self.corpus_dir):
-            fpath = os.path.join(self.corpus_dir, fname).decode("utf-8")
+        for fname in os.listdir(self._corpus_dir):
+            fpath = os.path.join(self._corpus_dir, fname).decode("utf-8")
             lemma = fname.decode("utf-8")
 
             logger.info(u"Getting corpus from lemma {}".format(lemma).encode("utf-8"))
 
-            yield SenSemCorpus(lemma, fpath)
+            if not self._is_binary:
+                yield SenSemCorpus(lemma, fpath)
+            else:
+                yield pickle.load(fpath)
 
 
 class SenSemCorpus(Corpus):

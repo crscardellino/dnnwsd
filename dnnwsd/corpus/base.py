@@ -89,8 +89,9 @@ class Sentence(object):
 
 
 class CorpusDirectoryIterator(object):
-    def __init__(self, corpus_dir):
-        self.corpus_dir = corpus_dir
+    def __init__(self, corpus_dir, is_binary):
+        self._corpus_dir = corpus_dir
+        self._is_binary = is_binary
 
     def __iter__(self):
         raise NotImplementedError
