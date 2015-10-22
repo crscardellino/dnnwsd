@@ -30,20 +30,21 @@ def _filter_symbols(line):
 class SenSemCorpusDirectoryIterator(CorpusDirectoryIterator):
     def __iter__(self):
         for fname in os.listdir(self._corpus_dir):
-            fpath = os.path.join(self._corpus_dir, fname).decode("utf-8")
-            lemma = fname.decode("utf-8")
+            fpath = os.path.join(self._corpus_dir, fname)
+            lemma = fname
 
             logger.info(u"Getting corpus from lemma {}".format(lemma).encode("utf-8"))
 
             if not self._is_binary:
                 yield SenSemCorpus(lemma, fpath)
             else:
-                yield pickle.load(fpath)
+                with open(fpath, "rb") as fout:
+                    yield pickle.load(fout)
 
 
 class SenSemCorpus(Corpus):
     def __init__(self, lemma, fpath, sense_filter=3):
-        assert isinstance(fpath, unicode)
+        assert isinstance(lemma, unicode) and isinstance(fpath, unicode)
 
         super(SenSemCorpus, self).__init__(lemma)
 
