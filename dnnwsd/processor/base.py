@@ -2,6 +2,8 @@
 
 import numpy as np
 
+from scipy import sparse
+
 
 class BaseProcessor(object):
     name = u"Base Processor"
@@ -14,7 +16,7 @@ class BaseProcessor(object):
         self.labels = sorted({sentence.sense for sentence in self.corpus})
         """:type : list of unicode"""
         self.dataset = None
-        """:type : numpy.ndarray"""
+        """:type : scipy.sparse.csr_matrix"""
         self.target = None
         """:type : numpy.ndarray"""
 
@@ -24,8 +26,11 @@ class BaseProcessor(object):
     def load_data(self, load_path):
         data = np.load(load_path)
 
-        self.dataset = data['dataset']
+        self.dataset = sparse.csr_matrix(
+            (data['dataset'], data['indices'], data['indptr']), shape=data['shape']
+        )
         self.target = data['target']
 
     def save_data(self, save_path):
-        np.savez(save_path, dataset=self.dataset, target=self.target)
+        np.savez(save_path, dataset=self.dataset.data, indices=self.dataset.indices,
+                 indptr=self.dataset.indptr, shape=self.dataset.shape, target=self.target)
