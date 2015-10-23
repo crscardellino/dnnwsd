@@ -20,6 +20,9 @@ class BaseProcessor(object):
         self.target = None
         """:type : numpy.ndarray"""
 
+    def features_dimension(self):
+        raise NotImplementedError
+
     def instances(self, force=False):
         raise NotImplementedError
 

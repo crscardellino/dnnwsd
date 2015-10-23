@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 
 import logging
-import numpy as np
 
 from keras import models, regularizers
 from keras.layers import containers, core
@@ -22,7 +21,7 @@ class StackedDenoisingAutoencoder(BaseModel):
         self._epochs = epochs
         self._batch_size = batch_size
         self._model = None
-        """:type : keras.model.Sequential"""
+        """:type : keras.models.Sequential"""
 
     def _pretraining(self, X):
         """

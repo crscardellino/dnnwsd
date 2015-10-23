@@ -70,7 +70,7 @@ class SupervisedPipeline(object):
 
             if mkey == 'autoencoder':
                 mparam['classes_amount'] = len(processor.labels)
-                mparam['layers'].insert(0, processor.dataset.shape[1])
+                mparam['layers'].insert(0, processor.features_dimension())
 
             model = self.models_map[mkey](**mparam)
             """:type : dnnwsd.models.base.BaseModel"""

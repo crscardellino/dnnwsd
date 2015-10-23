@@ -79,6 +79,9 @@ class BoWProcessor(BaseProcessor):
         self.dataset = sparse.csr_matrix(np.vstack(dataset))
         self.target = np.array(target, dtype=np.int32)
 
+    def features_dimension(self):
+        return self.dataset.shape[1]
+
 
 class BoPoSProcessor(BoWProcessor):
     name = u"Bag of Part-of-Speech Processor"

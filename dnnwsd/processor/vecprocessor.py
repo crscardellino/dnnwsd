@@ -25,7 +25,6 @@ class WordVectorsProcessor(BaseProcessor):
         logger.info("Finished loading Word2Vec model")
 
         self.vector_size = self.word2vec_model.vector_size
-        self.features_dimension = self.vector_size * (self.window_size * 2 + 1)
 
     def _get_window_vector(self, sentence):
         window_vector = []
@@ -77,4 +76,7 @@ class WordVectorsProcessor(BaseProcessor):
 
         self.dataset = sparse.csr_matrix(np.vstack(dataset))
         self.target = np.array(target, dtype=np.int32)
+
+    def features_dimension(self):
+        return self.vector_size * (self.window_size * 2 + 1)
 
