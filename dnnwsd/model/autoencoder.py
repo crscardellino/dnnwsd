@@ -14,11 +14,12 @@ logger = logging.getLogger(__name__)
 
 
 class StackedDenoisingAutoencoder(BaseModel):
-    def __init__(self, layers, activation, classes_amount, epochs=10, batch_size=64):
+    def __init__(self, layers, activation, classes_amount, pre_train_epochs=5, fine_tune_epochs=10, batch_size=64):
         self._layers = layers
         self._activation = activation
         self._classes_amount = classes_amount
-        self._epochs = epochs
+        self._pre_train_epochs = pre_train_epochs
+        self._fine_tune_epochs = fine_tune_epochs
         self._batch_size = batch_size
         self._model = None
         """:type : keras.models.Sequential"""
@@ -47,7 +48,7 @@ class StackedDenoisingAutoencoder(BaseModel):
 
             ae.compile(loss='mean_squared_error', optimizer='sgd')
 
-            ae.fit(X, X, batch_size=self._batch_size, nb_epoch=self._epochs)
+            ae.fit(X, X, batch_size=self._batch_size, nb_epoch=self._pre_train_epochs)
 
             # Store trainined weight and update training data
             encoders.append(ae.layers[0].encoder)
@@ -70,7 +71,7 @@ class StackedDenoisingAutoencoder(BaseModel):
 
         self._model.compile(loss='categorical_crossentropy', optimizer='sgd')
 
-        self._model.fit(X, y, batch_size=self._batch_size, show_accuracy=True, nb_epoch=self._epochs)
+        self._model.fit(X, y, batch_size=self._batch_size, show_accuracy=True, nb_epoch=self._fine_tune_epochs)
 
     def fit(self, X, y):
         Y = np_utils.to_categorical(y, self._classes_amount)
