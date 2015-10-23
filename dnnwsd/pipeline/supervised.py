@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 
 import cPickle as pickle
-import itertools
 import logging
 import os
 
@@ -32,15 +31,13 @@ class SupervisedPipeline(object):
 
     def __init__(self, corpus_directory, results_directory, **kwargs):
         self._corpus_iterator = sensem.SenSemCorpusDirectoryIterator(
-            corpus_directory, kwargs.pop('binary_corpus', False)
+            corpus_directory, kwargs.pop('binary_corpus', False), kwargs.pop('sense_filter', 3)
         )
         self._results_directory = results_directory
         self._iterations = kwargs.pop('iterations', 5)
-        self._processors = kwargs.pop('processors', [])
-        # List of tuples. For each tuple the first argument is a keyword in processors_map, the second argument
-        # is a dictionary with the processors parameters
-        self._models = kwargs.pop('models', [])
-        # Similar to _processors, but each tuple has a model and its parameters
+        self._experiment_set = kwargs.pop('experiment_set', [])
+        # List of 4-tuples, each defining an experiment.
+        # (processor, processor_parameters, model, model_parameters)
         self._save_corpus_path = kwargs.pop('save_corpus_path', u"")
         self._save_datasets_path = kwargs.pop('save_datasets_path', u"")
         self._load_datasets_path = kwargs.pop('load_datasets_path', u"")
@@ -52,7 +49,7 @@ class SupervisedPipeline(object):
 
         experiments_dir = os.path.join(self._results_directory, corpus.lemma)
 
-        for (pkey, pparam), (mkey, mparam) in itertools.product(self._processors, self._models):
+        for (pkey, pparam, mkey, mparam) in self._experiment_set:
             experiment_name = u"{}_{}".format(pkey, mkey)
             results_save_path = os.path.join(experiments_dir, experiment_name)
             os.makedirs(results_save_path)
