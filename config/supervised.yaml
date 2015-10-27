@@ -13,9 +13,9 @@ pipeline:
   vocabulary_filter: 2
   pos_filter: 2
   word2vec_model_path: "resources/unannotated/SBW-vectors-300-min5.bin.gz"
-  layers: [75, 50, 25]
-  wordvec_layers: [[750, 300, 150], [1000, 500, 250], [1500, 750, 300]]
-  fine_tune_epochs: 25
-  pre_train_epochs: 5
+  encoder_layer: 50
+  encoder_wordvec_layer: [750, 1050, 1650]
+  fine_tune_epochs: 50
+  pre_train_epochs: 10
   batch_size: 32
   activation: 'sigmoid'

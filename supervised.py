@@ -72,9 +72,9 @@ if __name__ == "__main__":
                 }
 
                 if pkey != 'wordvec':
-                    mparam['layers'] = config['pipeline']['layers']
+                    mparam['layer'] = config['pipeline']['encoder_layer']
                 else:
-                    mparam['layers'] = config['pipeline']['wordvec_layers'][widx]
+                    mparam['layer'] = config['pipeline']['encoder_wordvec_layer'][widx]
 
             experiment_set.append((pkey, pparam, mkey, mparam))
 

@@ -26,7 +26,7 @@ class SupervisedPipeline(object):
 
     models_map = {
         'logreg': linear_model.LogisticRegression,
-        'autoencoder': autoencoder.StackedDenoisingAutoencoder
+        'autoencoder': autoencoder.DenoisingAutoencoder
     }
 
     def __init__(self, corpus_directory, results_directory, **kwargs):
@@ -70,7 +70,7 @@ class SupervisedPipeline(object):
 
             if mkey == 'autoencoder':
                 mparam['classes_amount'] = len(processor.labels)
-                mparam['layers'].insert(0, processor.features_dimension())
+                mparam['input_size'] = processor.features_dimension()
 
             model = self.models_map[mkey](**mparam)
             """:type : dnnwsd.models.base.BaseModel"""
