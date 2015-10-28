@@ -91,7 +91,7 @@ class SupervisedPipeline(object):
         for corpus in self._corpus_iterator:
             if not corpus.has_multiple_senses():
                 logger.info(u"Skipping experiments pipeline for lemma {}.".format(corpus.lemma) +
-                            u"The corpus doesn't have enought senses")
+                            u"The corpus doesn't have enough senses")
                 continue
 
             logger.info(u"Running experiments pipeline for lemma {}".format(corpus.lemma))

@@ -72,7 +72,12 @@ class SenSemCorpus(Corpus):
                 continue
 
             words = map(_get_word, filter(_filter_symbols, sentence))
-            predicate_index = map(lambda w: w.is_main_verb, words).index(True)
+            try:
+                predicate_index = map(lambda w: w.is_main_verb, words).index(True)
+            except ValueError:
+                logger.info(u"Ignoring sentence {} of lemma {} and sense {}"
+                            .format(sense_info[0], self.lemma, sense_info[1]).encode("utf-8"))
+                continue
 
             self._sentences.append(Sentence(words, predicate_index, sense_info[1]))
             self.senses[sense_info[1]] += 1
