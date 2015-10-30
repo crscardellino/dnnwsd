@@ -47,7 +47,9 @@ class SupervisedPipeline(object):
         :param corpus: ddnwsd.corpus.sensem.SenSemCorpus
         """
 
-        experiments_dir = os.path.join(self._results_directory, corpus.lemma)
+        lemma_index = self._corpus_iterator.verbs.index(corpus.lemma)
+
+        experiments_dir = os.path.join(self._results_directory, lemma_index)
 
         for (pkey, pparam, mkey, mparam) in self._experiment_set:
             experiment_name = u"{}_{}".format(pkey, mkey)
@@ -56,7 +58,7 @@ class SupervisedPipeline(object):
 
             processor = self.processors_map[pkey](corpus, **pparam)
             """:type : dnnwsd.processor.base.BaseProcessor"""
-            dataset_path = os.path.join(self._load_datasets_path, u"{}_{}.npz".format(corpus.lemma, pkey))
+            dataset_path = os.path.join(self._load_datasets_path, u"{}_{}.npz".format(lemma_index, pkey))
 
             if os.path.isfile(dataset_path):
                 processor.load_data(dataset_path)
@@ -64,7 +66,7 @@ class SupervisedPipeline(object):
                 processor.instances()
 
             if self._save_datasets_path:
-                dataset_path = os.path.join(self._save_datasets_path, u"{}_{}.npz".format(corpus.lemma, pkey))
+                dataset_path = os.path.join(self._save_datasets_path, u"{}_{}.npz".format(lemma_index, pkey))
                 if not os.path.isfile(dataset_path):  # Check if wasn't already created
                     processor.save_data(dataset_path)
 
@@ -97,7 +99,8 @@ class SupervisedPipeline(object):
             logger.info(u"Running experiments pipeline for lemma {}".format(corpus.lemma))
 
             if self._save_corpus_path:  # Save the corpus in the path
-                with open(os.path.join(self._save_corpus_path, u"{}.p".format(corpus.lemma)), "wb") as f:
+                lemma_index = self._corpus_iterator.verbs.index(corpus.lemma)
+                with open(os.path.join(self._save_corpus_path, u"{}.p".format(lemma_index)), "wb") as f:
                     logger.info(u"Saving corpus binary file in {}".format(f.name))
                     pickle.dump(corpus, f)
 

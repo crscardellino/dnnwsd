@@ -94,12 +94,12 @@ class Sentence(object):
 class CorpusDirectoryIterator(object):
     def __init__(self, corpus_dir):
         self._corpus_dir = corpus_dir
-        self._verbs = []
+        self.verbs = []
         self.__get_verbs__()
 
     def __get_verbs__(self):
         with open(os.path.join(self._corpus_dir, "verbs"), "r") as f:
-            self._verbs = unicodedata.normalize("NFC", f.read().decode("utf-8")).strip().split("\n")
+            self.verbs = unicodedata.normalize("NFC", f.read().decode("utf-8")).strip().split("\n")
 
     def __iter__(self):
         raise NotImplementedError

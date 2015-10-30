@@ -35,7 +35,7 @@ class SenSemCorpusDirectoryIterator(CorpusDirectoryIterator):
     def __iter__(self):
         for fname in (fin for fin in os.listdir(self._corpus_dir) if fin != "verbs"):
             fpath = os.path.join(self._corpus_dir, fname)
-            lemma = self._verbs[int(fname)]
+            lemma = self.verbs[int(fname)]
 
             logger.info(u"Getting corpus from lemma {}".format(lemma).encode("utf-8"))
 
