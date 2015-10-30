@@ -31,7 +31,7 @@ class SupervisedPipeline(object):
 
     def __init__(self, corpus_directory, results_directory, **kwargs):
         self._corpus_iterator = sensem.SenSemCorpusDirectoryIterator(
-            corpus_directory, kwargs.pop('binary_corpus', False), kwargs.pop('sense_filter', 3)
+            corpus_directory, kwargs.pop('sense_filter', 3)
         )
         self._results_directory = results_directory
         self._iterations = kwargs.pop('iterations', 5)

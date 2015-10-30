@@ -1,5 +1,8 @@
 # -*- coding: utf-8 -*-
 
+import os
+import unicodedata
+
 
 class Word(object):
     def __init__(self, token, tag=None, lemma=None, is_main_verb=False):
@@ -89,9 +92,14 @@ class Sentence(object):
 
 
 class CorpusDirectoryIterator(object):
-    def __init__(self, corpus_dir, is_binary):
+    def __init__(self, corpus_dir):
         self._corpus_dir = corpus_dir
-        self._is_binary = is_binary
+        self._verbs = []
+        self.__get_verbs__()
+
+    def __get_verbs__(self):
+        with open(os.path.join(self._corpus_dir, "verbs"), "r") as f:
+            self._verbs = unicodedata.normalize("NFC", f.read().decode("utf-8")).strip().split("\n")
 
     def __iter__(self):
         raise NotImplementedError

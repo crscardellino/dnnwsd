@@ -80,4 +80,6 @@ if __name__ == "__main__":
 
         run_pipeline(experiment_set, corpus_directory, rdir, config)
 
+        print >> sys.stderr, "Finish experiment for window of size {}\n".format(window_size)
+
     print >> sys.stderr, "Finished all experiments"
