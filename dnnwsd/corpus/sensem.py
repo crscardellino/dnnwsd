@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 
-import cPickle as pickle
 import logging
 import os
 import re
+import unicodedata
 
 from collections import defaultdict
 
@@ -44,7 +44,7 @@ class SenSemCorpusDirectoryIterator(CorpusDirectoryIterator):
 
 class SenSemCorpus(Corpus):
     def __init__(self, lemma, fpath, sense_filter=3):
-        assert isinstance(lemma, unicode) and isinstance(fpath, unicode)
+        assert isinstance(lemma, unicode)
 
         super(SenSemCorpus, self).__init__(lemma)
 
@@ -59,7 +59,7 @@ class SenSemCorpus(Corpus):
         logger.info(u"Parsing sentences from file {}".format(fpath).encode("utf-8"))
 
         for sentence in raw_sentences:
-            sentence = sentence.split("\n")
+            sentence = unicodedata.normalize("NFC", sentence).split("\n")
             sense_info = sentence.pop(0).split()
 
             if len(sense_info) != 3:
