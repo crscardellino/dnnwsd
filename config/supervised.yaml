@@ -1,9 +1,9 @@
 corpus:
-  directory: ""
-  sense_filter: 3
+  directory: "resources/sensem/"
+  sense_filter: 5 
 
 results:
-  directory: ""
+  directory: "results"
 
 pipeline:
   iterations: 5
@@ -12,10 +12,10 @@ pipeline:
   models: ["logreg", "autoencoder"]
   vocabulary_filter: 2
   pos_filter: 2
-  word2vec_model_path: "resources/unannotated/SBW-vectors-300-min5.bin.gz"
+  word2vec_model_path: "resources/wordvectors/SBW-vectors-300-min5.bin.gz"
   encoder_layer: 50
   encoder_wordvec_layer: [750, 1050, 1650]
-  fine_tune_epochs: 50
-  pre_train_epochs: 10
+  fine_tune_epochs: 15
+  pre_train_epochs: 5
   batch_size: 32
   activation: 'sigmoid'
