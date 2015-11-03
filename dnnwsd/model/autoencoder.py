@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import logging
+import numpy as np
 
 from keras import models, regularizers
 from keras.layers import containers, core
@@ -66,14 +67,23 @@ class DenoisingAutoencoder(BaseModel):
         self._model.fit(X, y, batch_size=self._batch_size, show_accuracy=True, nb_epoch=self._fine_tune_epochs)
 
     def fit(self, X, y):
+        if hasattr(X, "todense"):
+            X = X.todense()
+
         Y = np_utils.to_categorical(y, self._classes_amount)
 
-        encoder = self._pretraining(X.todense())
+        encoder = self._pretraining(np.copy(X))
 
-        self._fine_tuning(X.todense(), Y, encoder)
+        self._fine_tuning(X, Y, encoder)
 
     def predict(self, X):
-        return self._model.predict_classes(X.todense())
+        if hasattr(X, "todense"):
+            X = X.todense()
+
+        return self._model.predict_classes(X)
 
     def predict_proba(self, X):
-        return self._model.predict(X.todense())
+        if hasattr(X, "todense"):
+            X = X.todense()
+
+        return self._model.predict(X)

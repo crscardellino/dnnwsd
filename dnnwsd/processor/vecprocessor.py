@@ -1,10 +1,7 @@
 # -*- coding: utf-8 -*-
 
-import gensim
 import logging
 import numpy as np
-
-from scipy import sparse
 
 from .base import BaseProcessor
 from ..utils.setup_logging import setup_logging
@@ -68,12 +65,65 @@ class WordVectorsProcessor(BaseProcessor):
             dataset.append(window_vector)
             target.append(self.labels.index(sentence.sense))
 
-        logger.info(u"Dataset and target obtainded from the corpus of lemma {}"
+        logger.info(u"Dataset and target obtained from the corpus of lemma {}"
                     .format(self.corpus.lemma).encode("utf-8"))
 
-        self.dataset = sparse.csr_matrix(np.vstack(dataset))
+        self.dataset = np.vstack(dataset)
         self.target = np.array(target, dtype=np.int32)
 
     def features_dimension(self):
         return self.vector_size * (self.window_size * 2 + 1)
 
+
+class SemiSupervisedWordVectorsProcessor(WordVectorsProcessor):
+    def __init__(self, corpus, word2vec_model, untagged_corpus, window_size=5):
+        super(SemiSupervisedWordVectorsProcessor, self).__init__(corpus, word2vec_model, window_size)
+
+        self.untagged_corpus = untagged_corpus
+        """:type : dnnwsd.corpus.unannotated.UnannotatedCorpus"""
+        self.untagged_dataset = None
+        """:type : numpy.ndarray"""
+        self.automatic_dataset = np.array([])  # All the automatically annotated data will be moved here
+        """:type : numpy.ndarray"""
+        self.automatic_target = np.array([])  # This will store the automatically annotated targets
+        """:type : numpy.ndarray"""
+
+    def instances(self, sample_ratio=1., force=False):
+        assert 0. < sample_ratio <= 1.
+        super(SemiSupervisedWordVectorsProcessor, self).instances(force)
+
+        untagged_dataset = []
+
+        logger.info(u"Getting the untagged dataset and target of window vectors of the corpus from lemma {}"
+                    .format(self.corpus.lemma).encode("utf-8"))
+
+        if sample_ratio < 1.:
+            sample_size = int(len(self.untagged_corpus) * sample_ratio)
+            corpus_choices = set(np.random.choice(len(self.untagged_corpus), size=sample_size, replace=False))
+            corpus_sentences = (s for i, s in enumerate(self.untagged_corpus) if i in corpus_choices)
+        else:
+            corpus_sentences = (s for s in self.untagged_corpus)
+
+        for sentence in corpus_sentences:
+            window_vector = self._get_window_vector(sentence)
+
+            untagged_dataset.append(window_vector)
+
+        logger.info(u"Dataset and target obtained from the corpus of lemma {}"
+                    .format(self.corpus.lemma).encode("utf-8"))
+
+        self.untagged_dataset = np.vstack(untagged_dataset)
+
+    def tag_slice(self, slice_value, target):
+        self.automatic_dataset, self.untagged_dataset = (
+            np.vstack((self.automatic_dataset, self.untagged_dataset[slice_value])),
+            np.delete(self.untagged_dataset, slice_value)
+        )
+
+        self.automatic_target = np.hstack((self.automatic_target, target))
+
+    def untagged_corpus_size(self):
+        # Useful in case of a sampled corpus
+        assert self.untagged_corpus is not None
+
+        return self.untagged_dataset.shape[0]
