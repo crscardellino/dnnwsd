@@ -4,11 +4,23 @@ import os
 import unicodedata
 
 
+_tokens_with_symbols = {
+    u"ee.uu.": u"EEUU",
+    u"estados_unidos": u"EEUU",
+    u"u.s.a.": u"USA",
+    u"sr.": u"sr",
+    u"sra.": u"sra",
+    u"srta.": u"srta",
+    u"a.m.": u"am",
+    u"p.m.": u"pm"
+}
+
+
 class Word(object):
     def __init__(self, token, tag=None, lemma=None, is_main_verb=False):
         assert isinstance(token, unicode) and (lemma is None or isinstance(lemma, unicode))
 
-        self.token = token
+        self.token = token if token.lower() not in _tokens_with_symbols else _tokens_with_symbols[token.lower()]
         self.tag = tag
         self.lemma = lemma
         self.is_main_verb = is_main_verb

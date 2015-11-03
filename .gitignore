@@ -59,8 +59,9 @@ target/
 # OSX
 .DS_Store
 
-# Project resources
+# Project resources and results
 resources/
+results/
 
 # PyCharms
 .idea/

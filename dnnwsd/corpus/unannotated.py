@@ -21,9 +21,9 @@ def _filter_symbols(word):
     return not word.tag.startswith("F")
 
 
-class UnsupervisedCorpusDirectoryIterator(CorpusDirectoryIterator):
+class UnannotatedCorpusDirectoryIterator(CorpusDirectoryIterator):
     def __init__(self, corpus_dir, filtered_verbs):
-        super(UnsupervisedCorpusDirectoryIterator, self).__init__(corpus_dir)
+        super(UnannotatedCorpusDirectoryIterator, self).__init__(corpus_dir)
         self._filtered_verbs = set(self.verbs.index(verb) for verb in filtered_verbs)
 
     def __iter__(self):
@@ -36,14 +36,14 @@ class UnsupervisedCorpusDirectoryIterator(CorpusDirectoryIterator):
 
             logger.info(u"Getting corpus from lemma {}".format(lemma).encode("utf-8"))
 
-            yield UnsupervisedCorpus(lemma, fpath)
+            yield UnannotatedCorpus(lemma, fpath)
 
 
-class UnsupervisedCorpus(Corpus):
+class UnannotatedCorpus(Corpus):
     def __init__(self, lemma, fpath):
         assert isinstance(lemma, unicode)
 
-        super(UnsupervisedCorpus, self).__init__(lemma)
+        super(UnannotatedCorpus, self).__init__(lemma)
 
         logger.info(u"Reading sentences from file {}".format(fpath).encode("utf-8"))
 
