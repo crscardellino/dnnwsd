@@ -38,15 +38,19 @@ class DenoisingAutoencoder(BaseModel):
 
         ae = models.Sequential()
 
-        encoder = containers.Sequential([core.Dropout(0.5),
-                                         core.Dense(input_dim=self._input_size,
-                                                    output_dim=self._layer,
-                                                    activation=self._activation,
-                                                    init='uniform')])
-        decoder = containers.Sequential([core.Dense(input_dim=self._layer,
-                                                    output_dim=self._input_size,
-                                                    activation=self._activation,
-                                                    init='uniform')])
+        encoder = containers.Sequential()
+
+        encoder.add(core.Dropout(0.5))
+        encoder.add(core.Dense(input_dim=self._input_size,
+                               output_dim=self._layer,
+                               activation=self._activation,
+                               init='uniform'))
+
+        decoder = containers.Sequential()
+        decoder.add(core.Dense(input_dim=self._layer,
+                               output_dim=self._input_size,
+                               activation=self._activation,
+                               init='uniform'))
 
         ae.add(core.AutoEncoder(encoder=encoder, decoder=decoder, output_reconstruction=True))
 
