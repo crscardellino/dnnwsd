@@ -45,3 +45,49 @@ class ResultsHandler(object):
         with open(os.path.join(self._save_path, "fscores"), "w") as f:
             f.write(",".join(self._labels).encode("utf-8") + "\n")
             f.write(_format_matrix(self.fscores))
+
+
+class SemiSupervisedResultsHandler(ResultsHandler):
+    def __init__(self, **kwargs):
+        super(SemiSupervisedResultsHandler, self).__init__(**kwargs)
+
+        self.test_accuracies = []
+        self.test_precisions = []
+        self.test_recalls = []
+        self.test_fscores = []
+        self.manual_accuracy = []
+
+    def add_test_result(self, y_true, y_pred):
+        self.test_accuracies.append(accuracy_score(y_true, y_pred))
+
+        precision, recall, fscore, _ = precision_recall_fscore_support(
+            y_true, y_pred, labels=np.arange(len(self._labels))
+        )
+        self.test_precisions.append(precision)
+        self.test_recalls.append(recall)
+        self.test_fscores.append(fscore)
+
+    def add_manual_accuracy(self, manual_annotations):
+        self.manual_accuracy.append(sum(manual_annotations) / float(len(manual_annotations)))
+
+    def save_results(self):
+        super(SemiSupervisedResultsHandler, self).save_results()
+
+        with open(os.path.join(self._save_path, "test_accuracy"), "w") as f:
+            f.write("\n".join(map(lambda a: u"{:.02f}".format(a), self.test_accuracies)) + "\n")
+
+        with open(os.path.join(self._save_path, "test_precision"), "w") as f:
+            f.write(",".join(self._labels).encode("utf-8") + "\n")
+            f.write(_format_matrix(self.test_precisions))
+
+        with open(os.path.join(self._save_path, "test_recall"), "w") as f:
+            f.write(",".join(self._labels).encode("utf-8") + "\n")
+            f.write(_format_matrix(self.test_recalls))
+
+        with open(os.path.join(self._save_path, "test_fscores"), "w") as f:
+            f.write(",".join(self._labels).encode("utf-8") + "\n")
+            f.write(_format_matrix(self.test_fscores))
+
+        with open(os.path.join(self._save_path, "manual_accuracy"), "w") as f:
+            f.write(",".join(self._labels).encode("utf-8") + "\n")
+            f.write(_format_matrix(self.manual_accuracy))

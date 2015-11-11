@@ -4,22 +4,16 @@ import logging
 
 from sklearn.cross_validation import StratifiedKFold, StratifiedShuffleSplit
 
+from .base import Experiment, TRAIN_RATIO
 from ..utils.setup_logging import setup_logging
 
 setup_logging()
 logger = logging.getLogger(__name__)
 
-TRAIN_RATIO = 0.8
-VALIDATION_RATIO = 0.1
-TEST_RATIO = 0.1
 
-
-class SupervisedExperiment(object):
+class SupervisedExperiment(Experiment):
     def __init__(self, processor, model, kfolds=0):
-        self._processor = processor
-        """:type : dnnwsd.processor.base.BaseProcessor"""
-        self._model = model
-        """:type : dnnwsd.model.base.BaseModel"""
+        super(SupervisedExperiment, self).__init__(processor, model)
         self._kfolds = kfolds
 
     def split_dataset(self):
@@ -45,16 +39,16 @@ class SupervisedExperiment(object):
         if self._kfolds > 0:
             logger.info(u"Running {}-fold cross-validation on the dataset".format(self._kfolds))
 
-        for fold_idx, (train_index, test_index) in enumerate(dataset_split):
+        for fold_idx, (tr_index, te_index) in enumerate(dataset_split):
             if self._kfolds > 0:
                 logger.info(u"Running fold {}".format(fold_idx))
 
-            dataset = {
-                'X_train': self._processor.dataset[train_index],
-                'y_train': self._processor.target[train_index],
-                'X_test': self._processor.dataset[test_index],
-                'y_test': self._processor.target[test_index]
-            }
+            dataset = dict(
+                X_train=self._processor.dataset[tr_index],
+                y_train=self._processor.target[tr_index],
+                X_test=self._processor.dataset[te_index],
+                y_test=self._processor.target[te_index]
+            )
 
             logger.info(u"Fitting the classifier")
 
