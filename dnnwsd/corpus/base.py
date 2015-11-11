@@ -121,7 +121,7 @@ class Corpus(object):
     def __init__(self, lemma):
         assert isinstance(lemma, unicode)
 
-        self.lemma = lemma
+        self.lemma = unicodedata.normalize("NFC", lemma)
         self._sentences = []
         """:type : list of dnnwsd.corpus.base.Sentence"""
 
