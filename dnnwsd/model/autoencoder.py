@@ -38,13 +38,19 @@ class DenoisingAutoencoder(BaseModel):
 
         ae = models.Sequential()
 
-        encoder = containers.Sequential([core.Dropout(0.3), core.Dense(self._input_size, self._layer,
-                                                                       activation=self._activation)])
-        decoder = containers.Sequential([core.Dense(self._layer, self._input_size, activation=self._activation)])
+        encoder = containers.Sequential([core.Dropout(0.5),
+                                         core.Dense(input_dim=self._input_size,
+                                                    output_dim=self._layer,
+                                                    activation=self._activation,
+                                                    init='uniform')])
+        decoder = containers.Sequential([core.Dense(input_dim=self._layer,
+                                                    output_dim=self._input_size,
+                                                    activation=self._activation,
+                                                    init='uniform')])
 
         ae.add(core.AutoEncoder(encoder=encoder, decoder=decoder, output_reconstruction=True))
 
-        ae.compile(loss='mean_squared_error', optimizer='sgd')
+        ae.compile(loss='mean_squared_error', optimizer='adam')
 
         ae.fit(X, X, batch_size=self._batch_size, nb_epoch=self._pre_train_epochs)
 
@@ -58,11 +64,15 @@ class DenoisingAutoencoder(BaseModel):
         self._model.add(encoder)
 
         self._model.add(core.Dense(
-            self._layer, self._classes_amount, activation='softmax', W_regularizer=regularizers.l2(0.01),
+            input_dim=self._layer,
+            output_dim=self._classes_amount,
+            activation='softmax',
+            init='uniform',
+            W_regularizer=regularizers.l2(0.01),
             activity_regularizer=regularizers.activity_l2(0.01))
         )
 
-        self._model.compile(loss='categorical_crossentropy', optimizer='sgd')
+        self._model.compile(loss='categorical_crossentropy', optimizer='adam')
 
         self._model.fit(X, y, batch_size=self._batch_size, show_accuracy=True, nb_epoch=self._fine_tune_epochs)
 
