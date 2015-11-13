@@ -1,6 +1,6 @@
 corpus:
   directory: "resources/sensem/"
-  sense_filter: 5 
+  sense_filter: 3
 
 results:
   directory: "results"
@@ -15,7 +15,7 @@ pipeline:
   word2vec_model_path: "resources/wordvectors/SBW-vectors-300-min5.bin.gz"
   encoder_layer: 50
   encoder_wordvec_layer: [750, 1050, 1650]
-  fine_tune_epochs: 15
+  fine_tune_epochs: 10
   pre_train_epochs: 5
-  batch_size: 32
-  activation: 'sigmoid'
+  batch_size: 64
+  activation: 'tanh'
