@@ -60,9 +60,6 @@ class WordVectorsProcessor(BaseProcessor):
                     .format(self.corpus.lemma).encode("utf-8"))
 
         for sentence in self.corpus:
-            if sentence.sense == u"abrir-5":
-                continue
-
             window_vector = self._get_window_vector(sentence)
 
             dataset.append(window_vector)

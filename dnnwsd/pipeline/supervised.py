@@ -8,7 +8,7 @@ from sklearn import linear_model
 
 from ..corpus import sensem
 from ..experiment import results, supervised
-from ..model import autoencoder
+from ..model import mlp, mfl
 from ..processor import bowprocessor, vecprocessor
 from ..utils.setup_logging import setup_logging
 
@@ -26,7 +26,8 @@ class SupervisedPipeline(object):
 
     models_map = {
         'logreg': linear_model.LogisticRegression,
-        'autoencoder': autoencoder.DenoisingAutoencoder
+        'mlp': mlp.MultiLayerPerceptron,
+        'mfl': mfl.MostFrequentLabel
     }
 
     def __init__(self, corpus_directory, results_directory, **kwargs):
@@ -70,9 +71,12 @@ class SupervisedPipeline(object):
                 if not os.path.isfile(dataset_path):  # Check if wasn't already created
                     processor.save_data(dataset_path)
 
-            if mkey == 'autoencoder':
-                mparam['classes_amount'] = len(processor.labels)
-                mparam['input_size'] = processor.features_dimension()
+            if mkey == 'mfl':
+                mparam['labels'] = processor.labels
+
+            if mkey == 'mpl':
+                mparam['input_dim'] = processor.features_dimension()
+                mparam['output_dim'] = len(processor.labels)
 
             model = self.models_map[mkey](**mparam)
             """:type : dnnwsd.models.base.BaseModel"""

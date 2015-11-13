@@ -63,18 +63,18 @@ if __name__ == "__main__":
             if pkey in {'bopos', 'pos'}:
                 pparam['pos_filter'] = config['pipeline']['pos_filter']
 
-            if mkey == 'autoencoder':
-                mparam = {
-                    'fine_tune_epochs': config['pipeline']['fine_tune_epochs'],
-                    'pre_train_epochs': config['pipeline']['pre_train_epochs'],
-                    'batch_size': config['pipeline']['batch_size'],
-                    'activation': config['pipeline']['activation']
-                }
-
-                if pkey != 'wordvec':
-                    mparam['layer'] = config['pipeline']['encoder_layer']
-                else:
-                    mparam['layer'] = config['pipeline']['encoder_wordvec_layer'][widx]
+            # if mkey == 'autoencoder':
+            #     mparam = {
+            #         'fine_tune_epochs': config['pipeline']['fine_tune_epochs'],
+            #         'pre_train_epochs': config['pipeline']['pre_train_epochs'],
+            #         'batch_size': config['pipeline']['batch_size'],
+            #         'activation': config['pipeline']['activation']
+            #     }
+            #
+            #     if pkey != 'wordvec':
+            #         mparam['layer'] = config['pipeline']['encoder_layer']
+            #     else:
+            #         mparam['layer'] = config['pipeline']['encoder_wordvec_layer'][widx]
 
             experiment_set.append((pkey, pparam, mkey, mparam))
 
