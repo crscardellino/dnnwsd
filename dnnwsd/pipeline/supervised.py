@@ -53,7 +53,7 @@ class SupervisedPipeline(object):
         experiments_dir = os.path.join(self._results_directory, u"{:03d}".format(lemma_index))
 
         for (pkey, pparam, mkey, mparam) in self._experiment_set:
-            experiment_name = u"{}_{}".format(pkey, mkey)
+            experiment_name = u"{}_{}_{}_{}".format(pkey, mkey, mparam['layers'], mparam.get('pre_train_epochs', 0))
             results_save_path = os.path.join(experiments_dir, experiment_name)
             os.makedirs(results_save_path)
 
