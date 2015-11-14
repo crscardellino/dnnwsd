@@ -29,13 +29,14 @@ if __name__ == "__main__":
     with open(args.config_file, 'r') as f:
         config = yaml.load(f.read())
 
-    results_directory = os.path.join(config['results']['directory'],
-                                     "sense_filter_{}".format(config['corpus']['sense_filter'])).decode("utf-8")
-    os.makedirs(results_directory)
+    results_directory = os.path.join(config['results']['directory'])
+
+    if not os.path.isdir(results_directory):
+        os.makedirs(results_directory)
 
     shutil.copy2(args.config_file, results_directory)
 
-    corpus_directory = config['corpus']['directory'].decode("utf-8")
+    corpus_directory = config['corpus']['directory']
     iterations = config['pipeline']['iterations']
 
     print >> sys.stderr, "Loading word2vec model"
@@ -43,43 +44,33 @@ if __name__ == "__main__":
         config['pipeline']['word2vec_model_path'], binary=True
     )
 
-    for widx, window_size in enumerate(config['pipeline']['window_sizes']):
-        print >> sys.stderr, "Running experiment for window of size {}".format(window_size)
+    experiment_set = []
 
-        rdir = os.path.join(results_directory, "window_{}".format(window_size))
-        os.makedirs(rdir)
+    for processor, model in itertools.product(config['pipeline']['processors'], config['pipeline']['models']):
+        model = model.copy()  # To modify it without touching the original
 
-        experiment_set = []
+        pkey = processor
+        pparam = {'window_size': config['pipeline']['processors_defaults']['window_size']}
 
-        for pkey, mkey in itertools.product(config['pipeline']['processors'], config['pipeline']['models']):
-            pparam = {'window_size': window_size}
-            mparam = {}
+        if pkey in {'bow', 'bopos', 'pos'}:
+            pparam['vocabulary_filter'] = config['pipeline']['processors_defaults']['vocabulary_filter']
 
-            if pkey == 'wordvec':
-                pparam['word2vec_model'] = word2vec_model
-            else:
-                pparam['vocabulary_filter'] = config['pipeline']['vocabulary_filter']
+        if pkey in {'bopos', 'pos'}:
+            pparam['pos_filter'] = config['pipeline']['processors_defaults']['pos_filter']
 
-            if pkey in {'bopos', 'pos'}:
-                pparam['pos_filter'] = config['pipeline']['pos_filter']
+        if pkey == 'wordvec':
+            pparam['word2vec_model'] = word2vec_model
 
-            # if mkey == 'autoencoder':
-            #     mparam = {
-            #         'fine_tune_epochs': config['pipeline']['fine_tune_epochs'],
-            #         'pre_train_epochs': config['pipeline']['pre_train_epochs'],
-            #         'batch_size': config['pipeline']['batch_size'],
-            #         'activation': config['pipeline']['activation']
-            #     }
-            #
-            #     if pkey != 'wordvec':
-            #         mparam['layer'] = config['pipeline']['encoder_layer']
-            #     else:
-            #         mparam['layer'] = config['pipeline']['encoder_wordvec_layer'][widx]
+        try:
+            mkey = model.pop('type')
+        except KeyError:
+            import ipdb; ipdb.set_trace()
+        mparam = model
 
-            experiment_set.append((pkey, pparam, mkey, mparam))
+        mparam.update(config['pipeline']['models_defaults'].get(mkey, {}))
 
-        run_pipeline(experiment_set, corpus_directory, rdir, config)
+        experiment_set.append((pkey, pparam, mkey, mparam))
 
-        print >> sys.stderr, "Finish experiment for window of size {}\n".format(window_size)
+    run_pipeline(experiment_set, corpus_directory, results_directory, config)
 
     print >> sys.stderr, "Finished all experiments"

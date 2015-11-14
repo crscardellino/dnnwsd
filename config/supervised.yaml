@@ -1,21 +1,40 @@
 corpus:
-  directory: "resources/sensem/"
+  directory: resources/sensem/
   sense_filter: 3
 
 results:
-  directory: "results"
+  directory: results
 
 pipeline:
   iterations: 5
-  window_sizes: [5]
-  processors: ["wordvec"]
-  models: ["mfl"]
-  vocabulary_filter: 2
-  pos_filter: 2
-  word2vec_model_path: "resources/wordvectors/SBW-vectors-300-min5.bin.gz"
-  encoder_layer: 50
-  encoder_wordvec_layer: [750, 1050, 1650]
-  fine_tune_epochs: 10
-  pre_train_epochs: 5
-  batch_size: 64
-  activation: 'tanh'
+  processors:
+    - bow
+    - bopos
+    - pos
+    - wordvec
+  processors_defaults:
+    window_size: 5
+    vocabulary_filter: 2
+    pos_filter: 2
+  models:
+    - type: mlp
+      layers: 1
+    - type: mlp
+      layers: 2
+    - type: mlp
+      layers: 1
+      pre_train_epochs: 5
+    - type: mlp
+      layers: 2
+      pre_train_epochs: 5
+  models_defaults:
+    mlp:
+      fine_tune_epochs: 10
+      activation: tanh
+      batch_size: 64
+      optimizer: adam
+      weight_init: uniform
+      dropout_ratio: 0.5
+      l1_regularizer: 0.01
+      l2_regularizer: 0.01
+  word2vec_model_path: resources/wordvectors/SBW-vectors-300-min5.bin.gz
