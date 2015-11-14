@@ -7,7 +7,7 @@ results:
 
 pipeline:
   iterations: 5
-  window_sizes: [2, 3, 5]
+  window_sizes: [5]
   processors: ["wordvec"]
   models: ["mfl"]
   vocabulary_filter: 2

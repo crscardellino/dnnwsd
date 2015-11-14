@@ -120,7 +120,7 @@ class MultiLayerPerceptron(BaseModel):
 
             encoder = containers.Sequential()
             encoder.add(
-                core.Dropout(self._dropout_ratio, input_shape=(self.input_dim,))
+                core.Dropout(self._dropout_ratio, input_shape=(n_in,))
             )
             encoder.add(
                 core.Dense(
@@ -149,7 +149,10 @@ class MultiLayerPerceptron(BaseModel):
                 )
             )
 
+            logger.info(u"Compiling the autoencoder")
             autoencoder.compile(optimizer=self._optimizer, loss='mean_squared_error')
+
+            logger.info(u"Fitting the data")
             autoencoder.fit(X, X, batch_size=self._batch_size, nb_epoch=self._pre_train_epochs)
 
             # Store trained weight and update training data
