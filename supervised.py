@@ -31,8 +31,16 @@ if __name__ == "__main__":
 
     results_directory = os.path.join(config['results']['directory'])
 
-    if not os.path.isdir(results_directory):
-        os.makedirs(results_directory)
+    if os.path.isdir(results_directory):
+        overwrite = raw_input("Want to overwrite results? (Y/n)").strip().lower()
+        overwrite = "y" if overwrite == "" else overwrite
+
+        if overwrite.startswith("y"):
+            shutil.rmtree(results_directory)
+        else:
+            sys.exit(1)
+
+    os.makedirs(results_directory)
 
     shutil.copy2(args.config_file, results_directory)
 
@@ -61,10 +69,7 @@ if __name__ == "__main__":
         if pkey == 'wordvec':
             pparam['word2vec_model'] = word2vec_model
 
-        try:
-            mkey = model.pop('type')
-        except KeyError:
-            import ipdb; ipdb.set_trace()
+        mkey = model.pop('type')
         mparam = model
 
         mparam.update(config['pipeline']['models_defaults'].get(mkey, {}))

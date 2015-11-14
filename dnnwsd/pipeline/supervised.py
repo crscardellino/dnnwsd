@@ -74,7 +74,7 @@ class SupervisedPipeline(object):
             if mkey == 'mfl':
                 mparam['labels'] = processor.labels
 
-            if mkey == 'mpl':
+            if mkey == 'mlp':
                 mparam['input_dim'] = processor.features_dimension()
                 mparam['output_dim'] = len(processor.labels)
 
