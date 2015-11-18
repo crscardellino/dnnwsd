@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import os
+import re
 import unicodedata
 
 
@@ -20,7 +21,15 @@ class Word(object):
     def __init__(self, token, tag=None, lemma=None, is_main_verb=False):
         assert isinstance(token, unicode) and (lemma is None or isinstance(lemma, unicode))
 
-        self.token = token if token.lower() not in _tokens_with_symbols else _tokens_with_symbols[token.lower()]
+        self.token = ""
+
+        if token.lower() in _tokens_with_symbols:
+            self.token = _tokens_with_symbols[token.lower()]
+        elif re.match(r"^([\-])?\d+([.,]\d+)?$", token):
+            self.token = u"DIGITO"
+        else:
+            self.token = token
+
         self.tag = tag
         self.lemma = lemma
         self.is_main_verb = is_main_verb
