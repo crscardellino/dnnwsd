@@ -29,19 +29,19 @@ class WordVectorsProcessor(BaseProcessor):
             if tokens_and_lemmas:  # If there is an existing combination, take the best one (the first)
                 window_vector.append(self.word2vec_model[tokens_and_lemmas[0]])
             else:  # If no possible combination is found, use a zero pad. TODO: What is the best solution?
-                window_vector.append(np.zeros(self.vector_size, dtype='float32'))
+                window_vector.append(np.zeros(self.vector_size, dtype=np.float32))
 
-        window_vector = np.hstack(window_vector)  # Stack all the vector in one large vector
+        window_vector = np.hstack(window_vector)  # Stack all the vectors in one large vector
 
         # Padding the window vector in case the predicate is located near the start or end of the sentence
         if sentence.predicate_index - self.window_size < 0:  # Pad to left if the predicate is near to the start
             pad = abs(sentence.predicate_index - self.window_size)
-            window_vector = np.hstack((np.zeros(pad * self.vector_size, dtype='float32'), window_vector))
+            window_vector = np.hstack((np.zeros(pad * self.vector_size, dtype=np.float32), window_vector))
 
         if sentence.predicate_index + self.window_size + 1 > len(sentence):
             # Pad to right if the predicate is near to the end
             pad = sentence.predicate_index + self.window_size + 1 - len(sentence)
-            window_vector = np.hstack((window_vector, np.zeros(pad * self.vector_size, dtype='float32')))
+            window_vector = np.hstack((window_vector, np.zeros(pad * self.vector_size, dtype=np.float32)))
 
         return window_vector
 
@@ -73,6 +73,72 @@ class WordVectorsProcessor(BaseProcessor):
 
     def features_dimension(self):
         return self.vector_size * (self.window_size * 2 + 1)
+
+
+class WordVectorsPoSProcessor(WordVectorsProcessor):
+    name = u"Word Vectors with PoS Processor"
+
+    def __init__(self, corpus, word2vec_model, window_size=5):
+        super(WordVectorsPoSProcessor, self).__init__(corpus, word2vec_model, window_size)
+
+        self.pos_tags = sorted(set(corpus.pos_tags(self.window_size)))
+        self.pos_size = len(self.pos_tags)
+
+    def _get_tag_one_hot_encoding(self, tag):
+        one_hot = np.zeros(self.pos_size, dtype=np.float32)
+        one_hot[self.pos_tags.index(tag)] = 1.
+
+        return one_hot
+
+    def _get_tags_vector(self, sentence):
+        tags_vector = []
+
+        for word in sentence.predicate_window(self.window_size):
+            tags_vector.append(self._get_tag_one_hot_encoding(word.tag))
+
+        tags_vector = np.hstack(tags_vector)  # Stack all the vectors in one large vector
+
+        # Padding the window vector in case the predicate is located near the start or end of the sentence
+        if sentence.predicate_index - self.window_size < 0:  # Pad to left if the predicate is near to the start
+            pad = abs(sentence.predicate_index - self.window_size)
+            tags_vector = np.hstack((np.zeros(pad * self.pos_size, dtype=np.float32), tags_vector))
+
+        if sentence.predicate_index + self.window_size + 1 > len(sentence):
+            # Pad to right if the predicate is near to the end
+            pad = sentence.predicate_index + self.window_size + 1 - len(sentence)
+            tags_vector = np.hstack((tags_vector, np.zeros(pad * self.pos_size, dtype=np.float32)))
+
+        return tags_vector
+
+    def instances(self, force=False):
+        if self.dataset and self.target and not force:
+            logger.warn(
+                u"The corpus dataset and target are already existent and will not be overwritten. " +
+                u"To force overwrite use the method with force == True"
+            )
+            return
+
+        dataset = []
+        target = []
+
+        logger.info(u"Getting the dataset and target of window vectors of the corpus from lemma {}"
+                    .format(self.corpus.lemma).encode("utf-8"))
+
+        for sentence in self.corpus:
+            window_vector = self._get_window_vector(sentence)
+            tags_vector = self._get_tags_vector(sentence)
+
+            dataset.append(np.hstack((window_vector, tags_vector)))
+            target.append(self.labels.index(sentence.sense))
+
+        logger.info(u"Dataset and target obtained from the corpus of lemma {}"
+                    .format(self.corpus.lemma).encode("utf-8"))
+
+        self.dataset = np.vstack(dataset)
+        self.target = np.array(target, dtype=np.int32)
+
+    def features_dimension(self):
+        return (self.vector_size + self.pos_size) * (self.window_size * 2 + 1)
 
 
 class SemiSupervisedWordVectorsProcessor(WordVectorsProcessor):

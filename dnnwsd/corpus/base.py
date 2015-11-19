@@ -30,7 +30,7 @@ class Word(object):
         else:
             self.token = token
 
-        self.tag = tag
+        self.tag = tag.upper()
         self.lemma = lemma
         self.is_main_verb = is_main_verb
 
@@ -164,3 +164,8 @@ class Corpus(object):
         for sentence in self:
             for word in sentence.predicate_window(window_size):
                 yield word.token
+
+    def pos_tags(self, window_size=0):
+        for sentence in self:
+            for word in sentence.predicate_window(window_size):
+                yield word.tag
