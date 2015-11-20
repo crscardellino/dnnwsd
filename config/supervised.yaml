@@ -12,6 +12,7 @@ pipeline:
     - bopos
     - pos
     - wordvec
+    - wordvecpos
   processors_defaults:
     window_size: 5
     vocabulary_filter: 2

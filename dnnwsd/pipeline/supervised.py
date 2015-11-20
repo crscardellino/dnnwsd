@@ -21,7 +21,8 @@ class SupervisedPipeline(object):
         'bow': bowprocessor.BoWProcessor,
         'bopos': bowprocessor.BoPoSProcessor,
         'pos': bowprocessor.PoSProcessor,
-        'wordvec': vecprocessor.WordVectorsProcessor
+        'wordvec': vecprocessor.WordVectorsProcessor,
+        'wordvecpos': vecprocessor.WordVectorsPoSProcessor
     }
 
     models_map = {

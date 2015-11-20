@@ -66,7 +66,7 @@ if __name__ == "__main__":
         if pkey in {'bopos', 'pos'}:
             pparam['pos_filter'] = config['pipeline']['processors_defaults']['pos_filter']
 
-        if pkey == 'wordvec':
+        if pkey in {'wordvec', 'wordvecpos'}:
             pparam['word2vec_model'] = word2vec_model
 
         mkey = model.pop('type')
