@@ -70,7 +70,7 @@ class SemiSupervisedResultsHandler(ResultsHandler):
         self.test_precisions = []
         self.test_recalls = []
         self.test_fscores = []
-        self.manual_accuracy = []
+        self.evaluation_sentences = []
 
     def add_test_result(self, y_true, y_pred):
         self.test_accuracies.append(accuracy_score(y_true, y_pred))
@@ -82,8 +82,8 @@ class SemiSupervisedResultsHandler(ResultsHandler):
         self.test_recalls.append(recall)
         self.test_fscores.append(fscore)
 
-    def add_manual_accuracy(self, manual_annotations):
-        self.manual_accuracy.append(sum(manual_annotations) / float(len(manual_annotations)))
+    def add_evaluation_sentences(self, evaluation_sentences):
+        self.evaluation_sentences.append(evaluation_sentences)
 
     def save_results(self):
         super(SemiSupervisedResultsHandler, self).save_results()
@@ -103,6 +103,7 @@ class SemiSupervisedResultsHandler(ResultsHandler):
             f.write(",".join(self._labels).encode("utf-8") + "\n")
             f.write(_format_matrix(self.test_fscores))
 
-        with open(os.path.join(self._save_path, "manual_accuracy"), "w") as f:
-            f.write(",".join(self._labels).encode("utf-8") + "\n")
-            f.write(_format_matrix(self.manual_accuracy))
+        for iteration, sentences in enumerate(self.evaluation_sentences, start=1):
+            with open(os.path.join(self._save_path, "{:03}_evaluation.txt".format(iteration)), "w") as f:
+                for sentence, target in self.evaluation_sentences:
+                    f.write(u"{} --- {}\n".format(target, sentence).encode("utf-8"))

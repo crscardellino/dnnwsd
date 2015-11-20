@@ -2,7 +2,6 @@
 
 import logging
 import numpy as np
-import sys
 
 from sklearn.cross_validation import train_test_split
 from sklearn.metrics import accuracy_score
@@ -22,6 +21,7 @@ class SemiSupervisedExperiment(Experiment):
         self._confidence_threshold = kwargs.pop("confidence_threshold", 0.99)
         self._minimum_instances = kwargs.pop("minimum_distances", int(self._processor.dataset.shape[0] * 0.01) + 1)
         self._max_iterations = kwargs.pop("max_iterations", 100)
+        self._evaluation_size = kwargs.pop("evaluation_size", 10)
         self._max_accuracy = 0.0
 
     def split_dataset(self):
@@ -60,6 +60,49 @@ class SemiSupervisedExperiment(Experiment):
                 np.hstack([init_te_index, te_index]),
                 np.hstack([init_va_index, va_index])
                 )
+
+    def _evaluate_sentences(self, candidates, target_candidates):
+        possible_targets = {t: None for t in target_candidates}
+
+        for idx, target in np.random.permutation(list(enumerate(target_candidates))):
+            if not possible_targets[target]:
+                possible_targets[target] = idx
+
+        evaluation_sentences = []
+
+        for target, index in possible_targets.iteritems():
+            ex = candidates[index]
+            sentence = []
+
+            for word in self._processor.unannotated_corpus[ex]:
+                word_token = u"_{}_".format(word.token) if word.is_main_verb else word.token
+                sentence.append(word_token)
+
+            sentence = " ".join(sentence)
+
+            evaluation_sentences.append((sentence, target))
+
+        possible_target_values = set(possible_targets.values())
+
+        evaluation_candidates =\
+            [(idx, ex) for idx, ex in enumerate(candidates) if idx not in possible_target_values]
+
+        evaluation_size = max(0, self._evaluation_size - len(evaluation_sentences))
+
+        for idx, ex in np.random.permutation(evaluation_candidates)[:evaluation_size]:
+            sentence = []
+
+            for word in self._processor.unannotated_corpus[ex]:
+                word_token = u"_{}_".format(word.token) if word.is_main_verb else word.token
+                sentence.append(word_token)
+
+            sentence = " ".join(sentence)
+
+            target_sense = self._processor.labels[target_candidates[idx]]
+
+            evaluation_sentences.append((sentence, target_sense))
+
+        return evaluation_sentences
 
     def _run_bootstrap(self, results_handler, supervised_dataset):
         """
@@ -118,28 +161,7 @@ class SemiSupervisedExperiment(Experiment):
                 self._model.predict(supervised_dataset['X_val'])
             )
 
-            manual_annotations = []
-
-            for idx, ex in np.random.permutation(list(enumerate(candidates)))[:10]:
-                print "Original Text:\n--------------"
-                sentence = self._processor.unannotated_corpus[ex]
-
-                for word in sentence:
-                    word_token = u"_{}_".format(word.token) if word.is_main_verb else word.token
-                    sys.stdout.write(u"{} ".format(word_token))
-                print
-
-                target_sense = self._processor.labels[target_candidates[idx]]
-
-                value = raw_input(u"Is {} the correct sense (Y/n): ".format(target_sense)).strip().lower()
-
-                sys.stdout.flush()
-
-                value = "y" if value == "" else value
-
-                manual_annotations.append(value.startswith("y"))
-
-            results_handler.add_manual_accuracy(manual_annotations)
+            results_handler.add_evaluation_sentences(self._evaluate_sentences(candidates, target_candidates))
 
             if self._processor.untagged_corpus_proportion()[0] == 0:
                 logger.info(
