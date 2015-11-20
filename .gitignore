@@ -70,3 +70,8 @@ results/
 /test.ipynb
 /test.py
 .ipynb_checkpoints/
+
+# Ignore everything in config but the models
+/config/*
+!/config/*.model
+
