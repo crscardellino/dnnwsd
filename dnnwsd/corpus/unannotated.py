@@ -22,21 +22,24 @@ def _filter_symbols(word):
 
 
 class UnannotatedCorpusDirectoryIterator(CorpusDirectoryIterator):
-    def __init__(self, corpus_dir, filtered_verbs):
-        super(UnannotatedCorpusDirectoryIterator, self).__init__(corpus_dir)
-        self._filtered_verbs = set(self.verbs.index(verb) for verb in filtered_verbs)
-
     def __iter__(self):
-        for fname in (fin for fin in os.listdir(self._corpus_dir)
-                      if fin != "verbs" and int(fin) in self._filtered_verbs):
+        for fname in (fin for fin in os.listdir(self._corpus_dir) if fin != "verbs"):
             fpath = os.path.join(self._corpus_dir, fname)
             lemma = self.verbs[int(fname)]
 
             assert isinstance(lemma, unicode)
 
-            logger.info(u"Getting corpus from lemma {}".format(lemma).encode("utf-8"))
+            logger.info(u"Getting unannotated corpus from lemma {}".format(lemma).encode("utf-8"))
 
             yield UnannotatedCorpus(lemma, fpath)
+
+    def __getitem__(self, item):
+        fname = "{:03}".format(self.verbs.index(item))
+        fpath = os.path.join(self._corpus_dir, fname)
+
+        logger.info(u"Getting unannotated corpus from lemma {}".format(item).encode("utf-8"))
+
+        return UnannotatedCorpus(item, fpath)
 
 
 class UnannotatedCorpus(Corpus):
