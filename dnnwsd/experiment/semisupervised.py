@@ -19,7 +19,7 @@ class SemiSupervisedExperiment(Experiment):
         self._processor = processor
         """:type : dnnwsd.processor.vecprocessor.SemiSupervisedWordVectorsProcessor"""
         self._confidence_threshold = kwargs.pop("confidence_threshold", 0.99)
-        self._minimum_instances = kwargs.pop("minimum_distances", int(self._processor.dataset.shape[0] * 0.01) + 1)
+        self._minimum_instances = kwargs.pop("minimum_instances", int(self._processor.dataset.shape[0] * 0.01) + 1)
         self._max_iterations = kwargs.pop("max_iterations", 100)
         self._evaluation_size = kwargs.pop("evaluation_size", 10)
         self._max_accuracy = 0.0

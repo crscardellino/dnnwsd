@@ -144,7 +144,7 @@ class WordVectorsPoSProcessor(WordVectorsProcessor):
 class SemiSupervisedWordVectorsProcessor(WordVectorsProcessor):
     name = u"Semi Supervised Word Vectors Processor"
 
-    def __init__(self, corpus, word2vec_model, unannotated_corpus, window_size=5, sample_ratio=1.):
+    def __init__(self, corpus, unannotated_corpus, word2vec_model, window_size=5, sample_ratio=1.):
         assert 0. < sample_ratio <= 1.
         super(SemiSupervisedWordVectorsProcessor, self).__init__(corpus, word2vec_model, window_size)
 
