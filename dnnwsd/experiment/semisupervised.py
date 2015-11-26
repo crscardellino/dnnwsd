@@ -2,6 +2,7 @@
 
 import logging
 import numpy as np
+import scipy.sparse as sp
 
 from sklearn.cross_validation import train_test_split
 from sklearn.metrics import accuracy_score
@@ -127,8 +128,18 @@ class SemiSupervisedExperiment(Experiment):
             target_candidates = probabilities[candidates].argmax(axis=1)
 
             logger.info(u"Fitting dataset with automatically annotated candidates")
+
+            if supervised_dataset['X_train'] == np.ndarray:
+                stacked_data = np.vstack(
+                    (supervised_dataset['X_train'], self._processor.automatic_dataset, dataset_candidates)
+                )
+            else:  # If is not an array, then is a sparse matrix
+                stacked_data = sp.vstack(
+                    (supervised_dataset['X_train'], self._processor.automatic_dataset, dataset_candidates)
+                )
+
             self._model.fit(
-                np.vstack((supervised_dataset['X_train'], self._processor.automatic_dataset, dataset_candidates)),
+                stacked_data,
                 np.hstack((supervised_dataset['y_train'], self._processor.automatic_target, target_candidates))
             )
 
@@ -147,7 +158,7 @@ class SemiSupervisedExperiment(Experiment):
 
             if candidates.shape[0] < self._minimum_instances:
                 logger.info(
-                    u"Truncating at iteration {}. Only {} instances were added (the minimum being {})."
+                    u"Truncating at iteration {}. Only {} instances were selected (the minimum being {})."
                     .format(iteration, candidates.shape[0], self._minimum_instances)
                 )
                 break
@@ -210,8 +221,17 @@ class SemiSupervisedExperiment(Experiment):
 
         logger.info(u"Fitting final model")
 
+        if supervised_dataset['X_train'] == np.ndarray:
+            stacked_data = np.vstack(
+                (supervised_dataset['X_train'], self._processor.automatic_dataset)
+            )
+        else:  # If is not an array, then is a sparse matrix
+            stacked_data = sp.vstack(
+                (supervised_dataset['X_train'], self._processor.automatic_dataset)
+            )
+
         self._model.fit(
-            np.vstack((supervised_dataset['X_train'], self._processor.automatic_dataset)),
+            stacked_data,
             np.hstack((supervised_dataset['y_train'], self._processor.automatic_target))
         )
 
