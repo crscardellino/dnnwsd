@@ -4,6 +4,7 @@ import logging
 import numpy as np
 import scipy.sparse as sp
 
+from collections import Counter
 from sklearn.cross_validation import train_test_split
 from sklearn.metrics import accuracy_score
 
@@ -113,6 +114,8 @@ class SemiSupervisedExperiment(Experiment):
 
         results_handler.add_result(supervised_dataset['y_val'], self._model.predict(supervised_dataset['X_val']))
 
+        results_handler.add_target_distribution(supervised_dataset['y_train'])
+
         self._max_accuracy = results_handler.accuracies[-1]
 
         logger.info(u"Initial validation accuracy: {:.02f}".format(self._max_accuracy))
@@ -173,6 +176,12 @@ class SemiSupervisedExperiment(Experiment):
             )
 
             results_handler.add_evaluation_sentences(self._evaluate_sentences(candidates, target_candidates))
+
+            target_distribution = Counter(
+                np.hstack((supervised_dataset['y_train'], self._processor.automatic_target))
+            )
+
+            results_handler.add_target_distribution(target_distribution)
 
             if self._processor.untagged_corpus_proportion()[0] == 0:
                 logger.info(
