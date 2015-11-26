@@ -203,11 +203,12 @@ class SemiSupervisedWordVectorsProcessor(WordVectorsProcessor):
 class SemiSupervisedWordVectorsPoSProcessor(WordVectorsPoSProcessor):
     name = u"Semi-Supervised Word Vectors with PoS Processor"
 
-    def __init__(self, corpus, word2vec_model, pos_tags, window_size=5, sample_ratio=1.):
+    def __init__(self, corpus, unannotated_corpus, word2vec_model, pos_tags_path, window_size=5, sample_ratio=1.):
         super(SemiSupervisedWordVectorsPoSProcessor, self).__init__(corpus, word2vec_model, window_size)
 
-        self.pos_tags = pos_tags
-        self.pos_size = len(self.pos_tags)
+        with open(pos_tags_path, "r") as f:
+            self.pos_tags = f.read().strip().split()
+            self.pos_size = len(self.pos_tags)
 
         self.unannotated_corpus = unannotated_corpus
         """:type : dnnwsd.corpus.unannotated.UnannotatedCorpus"""
