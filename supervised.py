@@ -12,9 +12,9 @@ import yaml
 from dnnwsd.pipeline import supervised
 
 
-def run_pipeline(experiments, corpus_dir, results_dir, configuration):
+def run_pipeline(corpus_dir, results_dir, experiments, configuration):
     pipeline = supervised.SupervisedPipeline(
-        corpus_dir, results_dir, iterations=configuration['pipeline']['iterations'], experiment_set=experiments
+        corpus_dir, results_dir, experiments, iterations=configuration['pipeline']['iterations']
     )
 
     pipeline.run()
