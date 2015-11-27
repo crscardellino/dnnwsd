@@ -134,7 +134,7 @@ class SemiSupervisedExperiment(Experiment):
 
             logger.info(u"Fitting dataset with automatically annotated candidates")
 
-            if supervised_dataset['X_train'] == np.ndarray:
+            if type(supervised_dataset['X_train']) == np.ndarray:
                 stacked_data = np.vstack(
                     (supervised_dataset['X_train'], self._processor.automatic_dataset, dataset_candidates)
                 )
@@ -232,7 +232,7 @@ class SemiSupervisedExperiment(Experiment):
 
         logger.info(u"Fitting final model")
 
-        if supervised_dataset['X_train'] == np.ndarray:
+        if type(supervised_dataset['X_train']) == np.ndarray:
             stacked_data = np.vstack(
                 (supervised_dataset['X_train'], self._processor.automatic_dataset)
             )
