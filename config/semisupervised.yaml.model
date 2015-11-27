@@ -1,0 +1,37 @@
+annotated_corpus:
+  directory: resources/sensem/
+  sense_filter: 3
+
+unannotated_corpus:
+  directory: resources/unannotated/wikicorpus_lemmas
+  features_path: resources/unannotated/bow_features
+
+results:
+  directory: results
+
+pipeline:
+  max_iterations: 100
+  confidence_threshold: 0.99
+  evaluation_size: 10
+  word2vec_model_path: resources/wordvectors/SBW-vectors-300-min5.bin.gz
+  experiments:
+    - processor: bow
+      model: logreg
+    - processor: wordvec
+      model: mlp
+    - processor: wordvecpos
+      model: mlp
+  processor_config:
+    window_size: 5
+    vocabulary_filter: 2
+    sample_ratio: 1
+  model_config:
+    layers: 2
+    fine_tune_epochs: 15
+    activation: tanh
+    batch_size: 128
+    optimizer: adam
+    weight_init: uniform
+    dropout_ratio: 0.5
+    l1_regularizer: 0.01
+    l2_regularizer: 0.01
