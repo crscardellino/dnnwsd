@@ -12,8 +12,7 @@ def _format_matrix(matrix):
 
 
 class ResultsHandler(object):
-    def __init__(self, experiment_name, save_path, labels, target=list()):
-        self._experiment_name = experiment_name
+    def __init__(self, save_path, labels, target=list()):
         self._save_path = save_path
         self._labels = labels
         self.accuracies = []
@@ -44,15 +43,15 @@ class ResultsHandler(object):
 
         with open(os.path.join(self._save_path, "precision"), "w") as f:
             f.write(",".join(self._labels).encode("utf-8") + "\n")
-            f.write(_format_matrix(self.precisions))
+            f.write(_format_matrix(self.precisions) + "\n")
 
         with open(os.path.join(self._save_path, "recall"), "w") as f:
             f.write(",".join(self._labels).encode("utf-8") + "\n")
-            f.write(_format_matrix(self.recalls))
+            f.write(_format_matrix(self.recalls) + "\n")
 
         with open(os.path.join(self._save_path, "fscores"), "w") as f:
             f.write(",".join(self._labels).encode("utf-8") + "\n")
-            f.write(_format_matrix(self.fscores))
+            f.write(_format_matrix(self.fscores) + "\n")
 
         if self.target_counts:
             with open(os.path.join(self._save_path, "most_common_precision"), "w") as f:
@@ -101,15 +100,15 @@ class SemiSupervisedResultsHandler(ResultsHandler):
 
         with open(os.path.join(self._save_path, "test_precision"), "w") as f:
             f.write(",".join(self._labels).encode("utf-8") + "\n")
-            f.write(_format_matrix(self.test_precisions))
+            f.write(_format_matrix(self.test_precisions) + "\n")
 
         with open(os.path.join(self._save_path, "test_recall"), "w") as f:
             f.write(",".join(self._labels).encode("utf-8") + "\n")
-            f.write(_format_matrix(self.test_recalls))
+            f.write(_format_matrix(self.test_recalls) + "\n")
 
         with open(os.path.join(self._save_path, "test_fscores"), "w") as f:
             f.write(",".join(self._labels).encode("utf-8") + "\n")
-            f.write(_format_matrix(self.test_fscores))
+            f.write(_format_matrix(self.test_fscores) + "\n")
 
         with open(os.path.join(self._save_path, "evaluation.txt"), "w") as f:
             for iteration, sentences in enumerate(self.evaluation_sentences, start=1):
@@ -118,7 +117,7 @@ class SemiSupervisedResultsHandler(ResultsHandler):
                 f.write("{}\n".format("="*13))
 
                 for sentence, target in sentences:
-                    f.write(u"{} --- {}\n".format(target, sentence).encode("utf-8"))
+                    f.write(u"{} -- {}\n".format(target, sentence).encode("utf-8"))
 
                 f.write("\n\n")
 

@@ -82,7 +82,9 @@ class SemiSupervisedExperiment(Experiment):
 
             sentence = " ".join(sentence)
 
-            evaluation_sentences.append((sentence, target))
+            target_sense = self._processor.labels[target]
+
+            evaluation_sentences.append((sentence, target_sense))
 
         possible_target_values = set(possible_targets.values())
 
@@ -114,7 +116,7 @@ class SemiSupervisedExperiment(Experiment):
 
         results_handler.add_result(supervised_dataset['y_val'], self._model.predict(supervised_dataset['X_val']))
 
-        results_handler.add_target_distribution(supervised_dataset['y_train'])
+        results_handler.add_target_distribution(Counter(supervised_dataset['y_train']))
 
         self._max_accuracy = results_handler.accuracies[-1]
 
