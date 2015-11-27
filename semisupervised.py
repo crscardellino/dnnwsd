@@ -44,10 +44,9 @@ if __name__ == "__main__":
     shutil.copy2(args.config_file, results_directory)
 
     print >> sys.stderr, "Loading word2vec model"
-    # word2vec_model = gensim.models.Word2Vec.load_word2vec_format(
-    #     config['pipeline']['word2vec_model_path'], binary=True
-    # )
-    word2vec_model = None
+    word2vec_model = gensim.models.Word2Vec.load_word2vec_format(
+        config['pipeline']['word2vec_model_path'], binary=True
+    )
 
     corpus_directory = config['annotated_corpus']['directory']
     unannotated_corpus_directory = config['unannotated_corpus']['directory']
