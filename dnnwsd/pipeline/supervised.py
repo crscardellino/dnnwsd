@@ -31,15 +31,15 @@ class SupervisedPipeline(object):
         'mfl': mfl.MostFrequentLabel
     }
 
-    def __init__(self, corpus_directory, results_directory, **kwargs):
+    def __init__(self, corpus_directory, results_directory, experiment_set, **kwargs):
         self._corpus_iterator = sensem.SenSemCorpusDirectoryIterator(
             corpus_directory, kwargs.pop('sense_filter', 3)
         )
         self._results_directory = results_directory
-        self._iterations = kwargs.pop('iterations', 5)
-        self._experiment_set = kwargs.pop('experiment_set', [])
+        self._experiment_set = experiment_set
         # List of 4-tuples, each defining an experiment.
         # (processor, processor_parameters, model, model_parameters)
+        self._iterations = kwargs.pop('iterations', 5)
         self._save_corpus_path = kwargs.pop('save_corpus_path', "")
         self._save_datasets_path = kwargs.pop('save_datasets_path', "")
         self._load_datasets_path = kwargs.pop('load_datasets_path', "")

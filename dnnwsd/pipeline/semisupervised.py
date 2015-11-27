@@ -27,7 +27,8 @@ class SemiSupervisedPipeline(object):
         'mlp': mlp.MultiLayerPerceptron
     }
 
-    def __init__(self, corpus_directory, unannotated_corpus_directory, results_directory, features_path, **kwargs):
+    def __init__(self, corpus_directory, unannotated_corpus_directory, results_directory,
+                 experiment_set, features_path, **kwargs):
         self._corpus_iterator = sensem.SenSemCorpusDirectoryIterator(
             corpus_directory, kwargs.pop('sense_filter', 3)
         )
@@ -35,12 +36,12 @@ class SemiSupervisedPipeline(object):
             unannotated_corpus_directory
         )
         self._results_directory = results_directory
-        self._features_path = features_path
-        self._experiment_set = kwargs.pop('experiment_set', [])
+        self._experiment_set = experiment_set
         # List of 4-tuples, each defining an experiment.
         # (processor, processor_parameters, model, model_parameters)
+        self._features_path = features_path
         self._confidence_threshold = kwargs.pop("confidence_threshold", 0.99)
-        self._minimum_instances = kwargs.pop("minimum_distances", None)
+        self._minimum_instances = kwargs.pop("minimum_instances", None)
         self._max_iterations = kwargs.pop("max_iterations", 100)
         self._evaluation_size = kwargs.pop("evaluation_size", 10)
 
