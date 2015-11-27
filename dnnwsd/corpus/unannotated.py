@@ -23,7 +23,7 @@ def _filter_symbols(word):
 
 class UnannotatedCorpusDirectoryIterator(CorpusDirectoryIterator):
     def __iter__(self):
-        for fname in (fin for fin in os.listdir(self._corpus_dir) if fin != "verbs"):
+        for fname in sorted((fin for fin in os.listdir(self._corpus_dir) if fin != "verbs")):
             fpath = os.path.join(self._corpus_dir, fname)
             lemma = self.verbs[int(fname)]
 

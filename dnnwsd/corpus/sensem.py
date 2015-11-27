@@ -33,7 +33,7 @@ class SenSemCorpusDirectoryIterator(CorpusDirectoryIterator):
         self._sense_filter = sense_filter
 
     def __iter__(self):
-        for fname in (fin for fin in os.listdir(self._corpus_dir) if fin != "verbs"):
+        for fname in sorted((fin for fin in os.listdir(self._corpus_dir) if fin != "verbs")):
             fpath = os.path.join(self._corpus_dir, fname)
             lemma = self.verbs[int(fname)]
 

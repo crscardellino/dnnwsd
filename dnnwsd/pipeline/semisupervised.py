@@ -112,7 +112,8 @@ class SemiSupervisedPipeline(object):
 
             unannotated_corpus = self._unannotated_corpus_iterator[annotated_corpus.lemma]
 
-            logger.info(u"Running experiments pipeline for lemma {}".format(annotated_corpus.lemma))
+            logger.info(u"Running experiments pipeline for lemma {} with index {}"
+                        .format(annotated_corpus.lemma, corpus_index))
 
             self._run_for_corpus(annotated_corpus, unannotated_corpus, corpus_index)
 
