@@ -109,6 +109,7 @@ class SemiSupervisedPipeline(object):
             if corpus_index < self._starting_lemma:
                 logger.info(u"Skipping experiments pipeline for lemma {}. ".format(annotated_corpus.lemma) +
                             u"The corpus has already been parsed.")
+                continue
 
             if not annotated_corpus.has_multiple_senses() or annotated_corpus.lemma == u"estar":
                 logger.info(u"Skipping experiments pipeline for lemma {}. ".format(annotated_corpus.lemma) +
