@@ -1,6 +1,7 @@
 annotated_corpus:
   directory: resources/sensem/
   sense_filter: 3
+  starting_lemma: 6
 
 unannotated_corpus:
   directory: resources/unannotated/wikicorpus_lemmas

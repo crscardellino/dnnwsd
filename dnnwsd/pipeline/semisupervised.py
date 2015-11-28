@@ -44,6 +44,7 @@ class SemiSupervisedPipeline(object):
         self._minimum_instances = kwargs.pop("minimum_instances", None)
         self._max_iterations = kwargs.pop("max_iterations", 100)
         self._evaluation_size = kwargs.pop("evaluation_size", 10)
+        self._starting_lemma = kwargs.pop("starting_lemma", 0)
 
     def _run_for_corpus(self, annotated_corpus, unannotated_corpus, corpus_index):
         """
@@ -105,8 +106,12 @@ class SemiSupervisedPipeline(object):
         logger.info(u"Running semi-supervised experiments pipeline for whole corpus")
 
         for corpus_index, annotated_corpus in enumerate(self._corpus_iterator):
+            if corpus_index < self._starting_lemma:
+                logger.info(u"Skipping experiments pipeline for lemma {}. ".format(annotated_corpus.lemma) +
+                            u"The corpus has already been parsed.")
+
             if not annotated_corpus.has_multiple_senses() or annotated_corpus.lemma == u"estar":
-                logger.info(u"Skipping experiments pipeline for lemma {}.".format(annotated_corpus.lemma) +
+                logger.info(u"Skipping experiments pipeline for lemma {}. ".format(annotated_corpus.lemma) +
                             u"The corpus doesn't have enough senses")
                 continue
 

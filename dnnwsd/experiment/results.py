@@ -124,4 +124,4 @@ class SemiSupervisedResultsHandler(ResultsHandler):
         with open(os.path.join(self._save_path, "targets_distribution"), "w") as f:
             for iteration, target_distribution in enumerate(self.target_distributions):
                 for idx, label in enumerate(self._labels):
-                    f.write(u"{:03d},{},{}\n".format(iteration, label, target_distribution[idx]))
+                    f.write(u"{:03d},{},{}\n".format(iteration, label, target_distribution[idx]).encode("utf-8"))

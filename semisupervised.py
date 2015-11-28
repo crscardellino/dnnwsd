@@ -77,7 +77,8 @@ if __name__ == "__main__":
         max_iterations=config['pipeline']['max_iterations'],
         confidence_threshold=config['pipeline']['confidence_threshold'],
         evaluation_size=config['pipeline']['evaluation_size'],
-        sense_filter=config['annotated_corpus']['sense_filter']
+        sense_filter=config['annotated_corpus']['sense_filter'],
+        starting_lemma=config['annotated_corpus']['starting_lemma']
     )
 
     run_pipeline(corpus_directory, unannotated_corpus_directory, results_directory,
