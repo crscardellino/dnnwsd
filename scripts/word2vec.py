@@ -40,8 +40,8 @@ if __name__ == "__main__":
                         help="Set the minimum number of occurrences for a word", default=5)
     parser.add_argument("--sample", type=float, metavar="SAMPLE",
                         help="Threshold for configuring which higher-frequency words are randomly downsampled",
-                        default=1E-5)
-    parser.add_argument("--alpha", type=float, metavar="ALPHA", help="Set the starting learning rate", default=0.01)
+                        default=1E-6)
+    parser.add_argument("--alpha", type=float, metavar="ALPHA", help="Set the starting learning rate", default=0.025)
     parser.add_argument("--iter", type=int, metavar="ITERATIONS", help="number of iterations (epochs) over the corpus.",
                         default=5)
     parser.add_argument("--negs", type=int, metavar="NEGATIVE_SAMPLING_COUNT",
