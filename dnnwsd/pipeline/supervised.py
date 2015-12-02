@@ -4,7 +4,7 @@ import cPickle as pickle
 import logging
 import os
 
-from sklearn import linear_model
+from sklearn import ensemble, linear_model, tree
 
 from ..corpus import sensem
 from ..experiment import results, supervised
@@ -26,9 +26,11 @@ class SupervisedPipeline(object):
     }
 
     models_map = {
+        'decisiontree': tree.DecisionTreeClassifier,
         'logreg': linear_model.LogisticRegression,
+        'mfl': mfl.MostFrequentLabel,
         'mlp': mlp.MultiLayerPerceptron,
-        'mfl': mfl.MostFrequentLabel
+        'randomforest': ensemble.RandomForestClassifier
     }
 
     def __init__(self, corpus_directory, results_directory, experiment_set, **kwargs):
@@ -90,8 +92,7 @@ class SupervisedPipeline(object):
 
             logger.info(u"Running experiments for {} and model {}".format(processor.name, model.__class__.__name__))
 
-            results_handler = results.ResultsHandler(experiment_name, results_save_path,
-                                                     processor.labels, processor.target)
+            results_handler = results.ResultsHandler(results_save_path, processor.labels, processor.target)
 
             experiment = supervised.SupervisedExperiment(processor, model, kfolds=self._iterations)
 
