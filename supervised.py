@@ -76,6 +76,6 @@ if __name__ == "__main__":
 
         experiment_set.append((pkey, pparam, mkey, mparam))
 
-    run_pipeline(experiment_set, corpus_directory, results_directory, config)
+    run_pipeline(corpus_directory, results_directory, experiment_set, config)
 
     print >> sys.stderr, "Finished all experiments"
