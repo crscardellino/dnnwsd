@@ -3,7 +3,7 @@
 import logging
 import os
 
-from sklearn import linear_model
+from sklearn import linear_model, tree
 
 from ..corpus import sensem, unannotated
 from ..experiment import results, semisupervised
@@ -23,6 +23,7 @@ class SemiSupervisedPipeline(object):
     }
 
     models_map = {
+        'decisiontree': tree.DecisionTreeClassifier,
         'logreg': linear_model.LogisticRegression,
         'mlp': mlp.MultiLayerPerceptron
     }
