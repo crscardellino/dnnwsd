@@ -14,7 +14,9 @@ from dnnwsd.pipeline import supervised
 
 def run_pipeline(corpus_dir, results_dir, experiments, configuration):
     pipeline = supervised.SupervisedPipeline(
-        corpus_dir, results_dir, experiments, iterations=configuration['pipeline']['iterations']
+        corpus_dir, results_dir, experiments,
+        corpus_directory_iterator=configuration['corpus']['iterator'],
+        iterations=configuration['pipeline']['iterations']
     )
 
     pipeline.run()

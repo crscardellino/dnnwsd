@@ -6,7 +6,7 @@ import os
 
 from sklearn import ensemble, linear_model, tree
 
-from ..corpus import sensem
+from ..corpus import sensem, semeval
 from ..experiment import results, supervised
 from ..model import mlp, mfl
 from ..processor import bowprocessor, vecprocessor
@@ -17,6 +17,11 @@ logger = logging.getLogger(__name__)
 
 
 class SupervisedPipeline(object):
+    corpus_iterators_map = {
+        'sensem': sensem.SenSemCorpusDirectoryIterator,
+        'semeval': semeval.SemevalCorpusDirectoryIterator
+    }
+
     processors_map = {
         'bow': bowprocessor.BoWProcessor,
         'bopos': bowprocessor.BoPoSProcessor,
@@ -34,7 +39,7 @@ class SupervisedPipeline(object):
     }
 
     def __init__(self, corpus_directory, results_directory, experiment_set, **kwargs):
-        self._corpus_iterator = sensem.SenSemCorpusDirectoryIterator(
+        self._corpus_iterator = self.corpus_iterators_map[kwargs.pop('corpus_directory_iterator', 'sensem')](
             corpus_directory, kwargs.pop('sense_filter', 3)
         )
         self._results_directory = results_directory
