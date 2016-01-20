@@ -170,6 +170,8 @@ class SemiSupervisedExperiment(Experiment):
 
             self._max_accuracy = max(self._max_accuracy, new_accuracy)
 
+            evaluation_sentences = self._evaluate_sentences(candidates, target_candidates)
+
             self._processor.tag_slice(candidates, target_candidates)
 
             results_handler.add_result(
@@ -177,7 +179,7 @@ class SemiSupervisedExperiment(Experiment):
                 self._model.predict(supervised_dataset['X_val'])
             )
 
-            results_handler.add_evaluation_sentences(self._evaluate_sentences(candidates, target_candidates))
+            results_handler.add_evaluation_sentences(evaluation_sentences)
 
             target_distribution = Counter(
                 np.hstack((supervised_dataset['y_train'], self._processor.automatic_target))

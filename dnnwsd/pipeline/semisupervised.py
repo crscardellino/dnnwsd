@@ -3,6 +3,7 @@
 import logging
 import os
 
+from copy import deepcopy
 from sklearn import linear_model, tree
 
 from ..corpus import sensem, unannotated
@@ -71,7 +72,7 @@ class SemiSupervisedPipeline(object):
             if pkey == 'bow':
                 pparam['features_path'] = os.path.join(self._features_path, "{:03d}.p".format(corpus_index))
 
-            processor = self.processors_map[pkey](annotated_corpus, unannotated_corpus, **pparam)
+            processor = self.processors_map[pkey](annotated_corpus, deepcopy(unannotated_corpus), **pparam)
             """:type : dnnwsd.processor.base.BaseProcessor"""
             processor.instances()
 
