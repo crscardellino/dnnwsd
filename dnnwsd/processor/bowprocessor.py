@@ -213,6 +213,9 @@ class SemiSupervisedBoWProcessor(BoWProcessor):
 
         self.automatic_target = np.hstack((self.automatic_target, target))
 
+        # slice the indexes in the corpus sentences (needed for evaluation)
+        self.unannotated_corpus.slice_indexes(slice_range)
+
     def untagged_corpus_size(self):
         return int(len(self.unannotated_corpus) * self._sample_ratio)
 

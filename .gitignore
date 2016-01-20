@@ -75,3 +75,14 @@ results/
 /config/*
 !/config/*.model
 
+# R related files
+.RData
+.Rhistory
+
+# vim
+.*.swp
+
+# plots
+*.pdf
+*.png
+*.jpg

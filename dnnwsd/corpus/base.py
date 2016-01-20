@@ -153,6 +153,10 @@ class Corpus(object):
     def __len__(self):
         return len(self._sentences)
 
+    def slice_indexes(self, indexes):
+        for index in sorted(indexes, reverse=True):
+            del self._sentences[index]
+
     def tokens(self, window_size=0):
         """
         Method to return all the tokens for every predicate window of every sentence.
