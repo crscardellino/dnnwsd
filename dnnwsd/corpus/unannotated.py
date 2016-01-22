@@ -42,7 +42,7 @@ class UnannotatedCorpusDirectoryIterator(CorpusDirectoryIterator):
         return UnannotatedCorpus(item, fpath)
 
 
-class SemevalUnannotatedCorpusIterator(UnannotatedCorpusDirectoryIterator):
+class SemevalUnannotatedCorpusDirectoryIterator(UnannotatedCorpusDirectoryIterator):
     def __get_verbs__(self):
         with open(os.path.join(self._corpus_dir, "lemmas"), "r") as f:
             self.verbs = f.read().decode("utf-8").strip().split("\n")
