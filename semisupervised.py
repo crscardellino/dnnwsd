@@ -74,6 +74,7 @@ if __name__ == "__main__":
         experiment_set.append((pkey, pparam, mkey, mparam))
 
     configuration = dict(
+        corpus_directory_iterator=config['annotated_corpus']['iterator'],
         max_iterations=config['pipeline']['max_iterations'],
         confidence_threshold=config['pipeline']['confidence_threshold'],
         evaluation_size=config['pipeline']['evaluation_size'],

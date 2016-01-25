@@ -1,4 +1,5 @@
 annotated_corpus:
+  iterator: sensem
   directory: resources/sensem/
   sense_filter: 3
   starting_lemma: 6
