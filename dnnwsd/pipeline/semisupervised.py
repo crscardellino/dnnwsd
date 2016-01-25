@@ -6,7 +6,7 @@ import os
 from copy import deepcopy
 from sklearn import linear_model, tree
 
-from ..corpus import sensem, unannotated
+from ..corpus import sensem, semeval, unannotated
 from ..experiment import results, semisupervised
 from ..model import mlp
 from ..processor import bowprocessor, vecprocessor
@@ -17,6 +17,11 @@ logger = logging.getLogger(__name__)
 
 
 class SemiSupervisedPipeline(object):
+    corpus_iterators_map = {
+        'sensem': sensem.SenSemCorpusDirectoryIterator,
+        'semeval': semeval.SemevalCorpusDirectoryIterator
+    }
+
     processors_map = {
         'bow': bowprocessor.SemiSupervisedBoWProcessor,
         'wordvec': vecprocessor.SemiSupervisedWordVectorsProcessor,
@@ -31,7 +36,7 @@ class SemiSupervisedPipeline(object):
 
     def __init__(self, corpus_directory, unannotated_corpus_directory, results_directory,
                  experiment_set, features_path, **kwargs):
-        self._corpus_iterator = sensem.SenSemCorpusDirectoryIterator(
+        self._corpus_iterator = self.corpus_iterators_map[kwargs.pop('corpus_directory_iterator', 'sensem')](
             corpus_directory, kwargs.pop('sense_filter', 3)
         )
         self._unannotated_corpus_iterator = unannotated.UnannotatedCorpusDirectoryIterator(

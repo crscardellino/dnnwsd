@@ -29,7 +29,7 @@ for annotated_corpus in corpus_iter:
             tags.add(word.tag)
             tokens[word.token] += 1
 
-    fname = "{:03}.p".format(corpus_iter.verbs.index(annotated_corpus.lemma))
+    fname = "{:03}.p".format(corpus_iter.lemmas.index(annotated_corpus.lemma))
     fpath = os.path.join("resources/unannotated/wikicorpus/corpus_features", fname)
     with open(fpath, "wb") as f:
         pickle.dump(tokens, f)
