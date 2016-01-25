@@ -86,3 +86,6 @@ results/
 *.pdf
 *.png
 *.jpg
+
+# data files
+*.csv
