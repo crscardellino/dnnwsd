@@ -18,7 +18,7 @@ _tokens_with_symbols = {
 
 
 class Word(object):
-    def __init__(self, token, tag=None, lemma=None, is_main_verb=False):
+    def __init__(self, token, tag=None, lemma=None, is_main_lemma=False):
         assert isinstance(token, unicode) and (lemma is None or isinstance(lemma, unicode))
 
         self.token = ""
@@ -32,14 +32,14 @@ class Word(object):
 
         self.tag = tag.upper()
         self.lemma = lemma
-        self.is_main_verb = is_main_verb
+        self.is_main_lemma = is_main_lemma
 
     def __unicode__(self):
         tag = self.tag if self.tag else u""
         lemma = self.lemma if self.lemma else u""
-        verb = u"verb" if self.is_main_verb else u""
+        main_lemma = u"lemma" if self.is_main_lemma else u""
 
-        return u"{} {} {} {}".format(self.token, lemma, tag, verb).strip()
+        return u"{} {} {} {}".format(self.token, lemma, tag, main_lemma).strip()
 
     def __str__(self):
         return unicode(self).encode("utf-8")
@@ -115,12 +115,12 @@ class Sentence(object):
 class CorpusDirectoryIterator(object):
     def __init__(self, corpus_dir):
         self._corpus_dir = corpus_dir
-        self.verbs = []
-        self.__get_verbs__()
+        self.lemmas = []
+        self.__get_lemmas__()
 
-    def __get_verbs__(self):
-        with open(os.path.join(self._corpus_dir, "verbs"), "r") as f:
-            self.verbs = unicodedata.normalize("NFC", f.read().decode("utf-8")).strip().split("\n")
+    def __get_lemmas__(self):
+        with open(os.path.join(self._corpus_dir, "lemmas"), "r") as f:
+            self.lemmas = unicodedata.normalize("NFC", f.read().decode("utf-8")).strip().split("\n")
 
     def __iter__(self):
         raise NotImplementedError

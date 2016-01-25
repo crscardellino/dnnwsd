@@ -16,9 +16,9 @@ logger = logging.getLogger(__name__)
 
 def _get_word(line):
     word_info = line.split()
-    is_main_verb = len(word_info) == 5 and word_info[4] == u'verb'
+    is_main_lemma = len(word_info) == 5 and word_info[4] == u'lemma'
 
-    return Word(word_info[1], tag=word_info[3][:2], lemma=word_info[2], is_main_verb=is_main_verb)
+    return Word(word_info[1], tag=word_info[3][:2], lemma=word_info[2], is_main_lemma=is_main_lemma)
 
 
 def _filter_symbols(line):
@@ -33,9 +33,9 @@ class SenSemCorpusDirectoryIterator(CorpusDirectoryIterator):
         self._sense_filter = sense_filter
 
     def __iter__(self):
-        for fname in sorted((fin for fin in os.listdir(self._corpus_dir) if fin != "verbs")):
+        for fname in sorted((fin for fin in os.listdir(self._corpus_dir) if fin != "lemmas")):
             fpath = os.path.join(self._corpus_dir, fname)
-            lemma = self.verbs[int(fname)]
+            lemma = self.lemmas[int(fname)]
 
             logger.info(u"Getting corpus from lemma {}".format(lemma).encode("utf-8"))
 
@@ -69,7 +69,7 @@ class SenSemCorpus(Corpus):
 
             words = map(_get_word, filter(_filter_symbols, sentence))
             try:
-                predicate_index = map(lambda w: w.is_main_verb, words).index(True)
+                predicate_index = map(lambda w: w.is_main_lemma, words).index(True)
             except ValueError:
                 logger.info(u"Ignoring sentence {} of lemma {} and sense {}"
                             .format(sense_info[0], self.lemma, sense_info[1]).encode("utf-8"))

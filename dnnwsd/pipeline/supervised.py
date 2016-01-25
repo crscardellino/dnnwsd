@@ -56,7 +56,7 @@ class SupervisedPipeline(object):
         :param corpus: ddnwsd.corpus.sensem.SenSemCorpus
         """
 
-        lemma_index = self._corpus_iterator.verbs.index(corpus.lemma)
+        lemma_index = self._corpus_iterator.lemmas.index(corpus.lemma)
 
         experiments_dir = os.path.join(self._results_directory, "{:03d}".format(lemma_index))
 
@@ -117,7 +117,7 @@ class SupervisedPipeline(object):
             logger.info(u"Running experiments pipeline for lemma {}".format(corpus.lemma))
 
             if self._save_corpus_path:  # Save the corpus in the path
-                lemma_index = self._corpus_iterator.verbs.index(corpus.lemma)
+                lemma_index = self._corpus_iterator.lemmas.index(corpus.lemma)
                 with open(os.path.join(self._save_corpus_path, "{:03d}.p".format(lemma_index)), "wb") as f:
                     logger.info(u"Saving corpus binary file in {}".format(f.name))
                     pickle.dump(corpus, f)

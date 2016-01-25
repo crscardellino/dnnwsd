@@ -54,7 +54,7 @@ class SemiSupervisedPipeline(object):
         :param unannotated_corpus: ddnwsd.corpus.unannotated.UnannotatedCorpus
         """
 
-        lemma_index = self._corpus_iterator.verbs.index(annotated_corpus.lemma)
+        lemma_index = self._corpus_iterator.lemmas.index(annotated_corpus.lemma)
 
         experiments_dir = os.path.join(self._results_directory, "{:03d}".format(lemma_index))
 

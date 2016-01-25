@@ -11,10 +11,10 @@ setup_logging()
 logger = logging.getLogger(__name__)
 
 
-def _get_word(line, is_main_verb):
+def _get_word(line, is_main_lemma):
     word_info = line.split()
 
-    return Word(word_info[1], tag=word_info[3][:2], lemma=word_info[2], is_main_verb=is_main_verb)
+    return Word(word_info[1], tag=word_info[3][:2], lemma=word_info[2], is_main_lemma=is_main_lemma)
 
 
 def _filter_symbols(word):
@@ -23,9 +23,9 @@ def _filter_symbols(word):
 
 class UnannotatedCorpusDirectoryIterator(CorpusDirectoryIterator):
     def __iter__(self):
-        for fname in sorted((fin for fin in os.listdir(self._corpus_dir) if fin != "verbs" and fin != "lemmas")):
+        for fname in sorted((fin for fin in os.listdir(self._corpus_dir) if fin != "lemmas")):
             fpath = os.path.join(self._corpus_dir, fname)
-            lemma = self.verbs[int(fname)]
+            lemma = self.lemmas[int(fname)]
 
             assert isinstance(lemma, unicode)
 
@@ -34,18 +34,12 @@ class UnannotatedCorpusDirectoryIterator(CorpusDirectoryIterator):
             yield UnannotatedCorpus(lemma, fpath)
 
     def __getitem__(self, item):
-        fname = "{:03}".format(self.verbs.index(item))
+        fname = "{:03}".format(self.lemmas.index(item))
         fpath = os.path.join(self._corpus_dir, fname)
 
         logger.info(u"Getting unannotated corpus from lemma {}".format(item).encode("utf-8"))
 
         return UnannotatedCorpus(item, fpath)
-
-
-class SemevalUnannotatedCorpusDirectoryIterator(UnannotatedCorpusDirectoryIterator):
-    def __get_verbs__(self):
-        with open(os.path.join(self._corpus_dir, "lemmas"), "r") as f:
-            self.verbs = f.read().decode("utf-8").strip().split("\n")
 
 
 class UnannotatedCorpus(Corpus):
@@ -65,15 +59,15 @@ class UnannotatedCorpus(Corpus):
         for sentence in raw_sentences:
             sentence = unicodedata.normalize("NFC", sentence).split("\n")
             lemma_info = sentence.pop(0).split()
-            verb_position = int(lemma_info[2])
+            lemma_position = int(lemma_info[2])
 
             assert len(lemma_info) == 3
 
             words = filter(_filter_symbols, map(
-                lambda (i, l): _get_word(l, i == verb_position), enumerate(sentence, start=1)
+                lambda (i, l): _get_word(l, i == lemma_position), enumerate(sentence, start=1)
             ))
 
-            predicate_index = map(lambda w: w.is_main_verb, words).index(True)
+            predicate_index = map(lambda w: w.is_main_lemma, words).index(True)
 
             self._sentences.append(Sentence(words, predicate_index))
 

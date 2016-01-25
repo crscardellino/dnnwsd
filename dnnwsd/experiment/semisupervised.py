@@ -77,7 +77,7 @@ class SemiSupervisedExperiment(Experiment):
             sentence = []
 
             for word in self._processor.unannotated_corpus[ex]:
-                word_token = u"_{}_".format(word.token) if word.is_main_verb else word.token
+                word_token = u"_{}_".format(word.token) if word.is_main_lemma else word.token
                 sentence.append(word_token)
 
             sentence = " ".join(sentence)
@@ -97,7 +97,7 @@ class SemiSupervisedExperiment(Experiment):
             sentence = []
 
             for word in self._processor.unannotated_corpus[ex]:
-                word_token = u"_{}_".format(word.token) if word.is_main_verb else word.token
+                word_token = u"_{}_".format(word.token) if word.is_main_lemma else word.token
                 sentence.append(word_token)
 
             sentence = " ".join(sentence)
