@@ -2,11 +2,11 @@
 
 import logging
 import numpy as np
-import scipy.sparse as sp
 
 from collections import Counter
 from sklearn.cross_validation import train_test_split
 from sklearn.metrics import accuracy_score
+from scipy import sparse
 
 from .base import Experiment, TRAIN_RATIO
 from ..utils.setup_logging import setup_logging
@@ -139,7 +139,7 @@ class SemiSupervisedExperiment(Experiment):
                     (supervised_dataset['X_train'], self._processor.automatic_dataset, dataset_candidates)
                 )
             else:  # If is not an array, then is a sparse matrix
-                stacked_data = sp.vstack(
+                stacked_data = sparse.vstack(
                     (supervised_dataset['X_train'], self._processor.automatic_dataset, dataset_candidates)
                 )
 
@@ -239,7 +239,7 @@ class SemiSupervisedExperiment(Experiment):
                 (supervised_dataset['X_train'], self._processor.automatic_dataset)
             )
         else:  # If is not an array, then is a sparse matrix
-            stacked_data = sp.vstack(
+            stacked_data = sparse.vstack(
                 (supervised_dataset['X_train'], self._processor.automatic_dataset)
             )
 

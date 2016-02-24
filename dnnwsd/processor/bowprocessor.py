@@ -3,7 +3,6 @@
 import cPickle
 import logging
 import numpy as np
-import scipy.sparse as sp
 
 from collections import defaultdict
 from scipy import sparse
@@ -148,7 +147,7 @@ class SemiSupervisedBoWProcessor(BoWProcessor):
         """:type : dnnwsd.corpus.unannotated.UnannotatedCorpus"""
         self.unannotated_dataset = None
         """:type : numpy.ndarray"""
-        self.automatic_dataset = sp.csr_matrix((0, 0), dtype=np.float32)
+        self.automatic_dataset = sparse.csr_matrix((0, 0), dtype=np.float32)
         # All the automatically annotated data will be moved here
         """:type : numpy.ndarray"""
         self.automatic_target = np.array([], dtype=np.int32)  # This will store the automatically annotated targets
@@ -201,10 +200,10 @@ class SemiSupervisedBoWProcessor(BoWProcessor):
                     .format(self.corpus.lemma).encode("utf-8"))
 
         self.unannotated_dataset = sparse.csr_matrix(np.vstack(untagged_dataset))
-        self.automatic_dataset = sp.csr_matrix((0, self.unannotated_dataset.shape[1]))
+        self.automatic_dataset = sparse.csr_matrix((0, self.unannotated_dataset.shape[1]))
 
     def tag_slice(self, slice_range, target):
-        self.automatic_dataset = sp.vstack((self.automatic_dataset, self.unannotated_dataset[slice_range]))
+        self.automatic_dataset = sparse.vstack((self.automatic_dataset, self.unannotated_dataset[slice_range]))
 
         # Delete the slice from the unannotated_dataset
         mask = np.ones(self.unannotated_dataset.shape[0], dtype=bool)
