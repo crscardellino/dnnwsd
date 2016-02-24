@@ -29,7 +29,7 @@ with open(ifile, 'r') as inf:
 
             for idx, sentence in enumerate(sentences, start=1):
                 outl = re.sub(r'[\W_]+', ' ', sentence, flags=re.UNICODE).strip()
-                outl = re.sub(r'\d', 'DIGITO ', outl, flags=re.UNICODE).strip()
+                outl = re.sub(r'\d+', 'DIGITO ', outl, flags=re.UNICODE).strip()
                 outl = re.sub(r'\s+', ' ', outl, flags=re.UNICODE)  # Remove double spaces
 
                 outl_size = len(outl.split())
