@@ -161,13 +161,6 @@ class SemiSupervisedExperiment(Experiment):
                 )
                 break
 
-            if candidates.shape[0] < self._minimum_instances:
-                logger.info(
-                    u"Truncating at iteration {}. Only {} instances were selected (the minimum being {})."
-                    .format(iteration, candidates.shape[0], self._minimum_instances)
-                )
-                break
-
             self._max_accuracy = max(self._max_accuracy, new_accuracy)
 
             evaluation_sentences = self._evaluate_sentences(candidates, target_candidates)
@@ -190,6 +183,13 @@ class SemiSupervisedExperiment(Experiment):
             if self._processor.untagged_corpus_proportion()[0] == 0:
                 logger.info(
                     u"Truncating at iteration {}. No more instances to add."
+                    .format(iteration, candidates.shape[0], self._minimum_instances)
+                )
+                break
+
+            if candidates.shape[0] < self._minimum_instances:
+                logger.info(
+                    u"Truncating at iteration {}. Only {} instances were selected (the minimum being {})."
                     .format(iteration, candidates.shape[0], self._minimum_instances)
                 )
                 break
