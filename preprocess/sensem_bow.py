@@ -71,3 +71,5 @@ for corpus_index, annotated_corpus in enumerate(annotated_corpus_directory_itera
 
     corpus_dataset = path.join(corpus_datasets_dir, "{:03d}".format(corpus_index))
 
+    with open(corpus_dataset, "wb") as f:
+        pickle.dump(lemma_dataset, f)
