@@ -70,7 +70,7 @@ for corpus_index, annotated_corpus in enumerate(annotated_corpus_directory_itera
         unannotated_sentences=unannotated_sentences
     )
 
-    corpus_dataset = path.join(corpus_datasets_dir, "{:03d}".format(corpus_index))
+    corpus_dataset = path.join(corpus_datasets_dir, "{:03d}.p".format(corpus_index))
 
     with open(corpus_dataset, "wb") as f:
         pickle.dump(lemma_dataset, f)
