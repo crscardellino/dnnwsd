@@ -19,15 +19,13 @@ from dnnwsd.corpus import sensem, unannotated
 from dnnwsd.processor import bowprocessor
 
 annotated_corpus_directory = "../resources/sensem/"
-unannotated_corpus_directory = "../../wikicorpus/es/wikicorpus_lemmas_sample_30k/"
-corpus_datasets = "../resources/corpus_datasets/bow_datasets_es.p"
+unannotated_corpus_directory = "../../wikicorpus/es/wikicorpus_lemmas_sample_15k/"
+corpus_datasets_dir = "../resources/corpus_datasets/es/15k/bow"
 
 annotated_corpus_directory_iterator = sensem.SenSemCorpusDirectoryIterator(annotated_corpus_directory)
 unannotated_corpus_directory_iterator = unannotated.UnannotatedCorpusDirectoryIterator(unannotated_corpus_directory)
 
 semisupervised_features_directory = "../resources/semisupervised_features/es/"
-
-bow_datasets = {}
 
 for corpus_index, annotated_corpus in enumerate(annotated_corpus_directory_iterator):
     if not annotated_corpus.has_multiple_senses() or annotated_corpus.lemma == u'estar':
@@ -63,11 +61,13 @@ for corpus_index, annotated_corpus in enumerate(annotated_corpus_directory_itera
 
     unannotated_dataset = dict(data=bow_processor.unannotated_dataset, sentences=np.array(sentences_ids))
     
-    bow_datasets["{:03d}".format(corpus_index)] = dict(
+    lemma_dataset = dict(
+        lemma=annotated_corpus.lemma,
+        index="{:03d}".format(corpus_index),
         annotated_dataset=annotated_dataset,
         unannotated_dataset=unannotated_dataset,
         unannotated_sentences=unannotated_sentences
     )
 
-with open(corpus_datasets, "wb") as f:
-    pickle.dump(bow_datasets, f)
+    corpus_dataset = path.join(corpus_datasets_dir, "{:03d}".format(corpus_index))
+
