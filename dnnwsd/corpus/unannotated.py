@@ -12,7 +12,7 @@ logger = logging.getLogger(__name__)
 
 
 def _get_word(line, is_main_lemma):
-    word_info = line.split()
+    word_info = line.replace(u'\x00', ' ').split()
 
     return Word(word_info[1], tag=word_info[3][:2], lemma=word_info[2], is_main_lemma=is_main_lemma)
 
