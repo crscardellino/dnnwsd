@@ -17,24 +17,24 @@ import gensim
 from dnnwsd.utils import setup_logging
 setup_logging.CONFIG_FILE = u"../config/logging.yaml"
 
-from dnnwsd.corpus import sensem, unannotated
+from dnnwsd.corpus import semeval, unannotated
 from dnnwsd.processor import vecprocessor
 
-annotated_corpus_directory = "../resources/sensem/"
-unannotated_corpus_directory = "../../wikicorpus/es/wikicorpus_lemmas_sample_15k/"
-pos_tags_file = "../resources/semisupervised_features/es/pos_tags"
-corpus_datasets_dir = "../resources/corpus_datasets/es/15k/vecpos"
+annotated_corpus_directory = "../resources/semeval/lexelts"
+unannotated_corpus_directory = "../../wikicorpus/en/wikicorpus_lemmas_sample_15k/"
+pos_tags_file = "../resources/semisupervised_features/en/pos_tags"
+corpus_datasets_dir = "../resources/corpus_datasets/en/15k/vecpos"
 
-annotated_corpus_directory_iterator = sensem.SenSemCorpusDirectoryIterator(annotated_corpus_directory)
+annotated_corpus_directory_iterator = semeval.SemevalCorpusDirectoryIterator(annotated_corpus_directory)
 unannotated_corpus_directory_iterator = unannotated.UnannotatedCorpusDirectoryIterator(unannotated_corpus_directory,
                                                                                        corpus_name='sensem')
 
-word_vectors_path = "../resources/wordvectors/SBW-vectors-300-min5.bin.gz"
+word_vectors_path = "../resources/wordvectors/GoogleNews-vectors-negative300.bin.gz"
 
 word2vec_model = gensim.models.Word2Vec.load_word2vec_format(word_vectors_path, binary=True)
 
 for corpus_index, annotated_corpus in enumerate(annotated_corpus_directory_iterator):
-    if not annotated_corpus.has_multiple_senses() or annotated_corpus.lemma == u'estar':
+    if not annotated_corpus.has_multiple_senses():
         print u"Skipping preprocess for corpus of lemma {}".format(annotated_corpus.lemma)
         continue
 
