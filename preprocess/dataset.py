@@ -1,14 +1,9 @@
 # -*- coding: utf-8 -*-
 
 import cPickle as pickle
-import logging
 import numpy as np
 
 from sklearn.cross_validation import train_test_split
-from .setup_logging import setup_logging
-
-setup_logging()
-logger = logging.getLogger(__name__)
 
 
 class DataSet(object):
