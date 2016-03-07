@@ -171,8 +171,12 @@ class DataSets(object):
 
         # We randomly split the remaining examples
         tr_index, te_index = train_test_split(filtered_indices, train_size=train_ratio)
-        split_index = np.ceil(te_index.shape[0] / 2).astype(np.int32)
-        te_index, va_index = te_index[:split_index], te_index[split_index:]
+
+        if validation_ratio > 0:
+            split_index = np.ceil(te_index.shape[0] * test_ratio / (test_ratio + validation_ratio)).astype(np.int32)
+            te_index, va_index = te_index[:split_index], te_index[split_index:]
+        else:
+            va_index = []
 
         return (np.hstack([init_tr_index, tr_index]).astype(np.int32),
                 np.hstack([init_te_index, te_index]).astype(np.int32),
