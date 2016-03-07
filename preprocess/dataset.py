@@ -40,7 +40,7 @@ class DataSet(object):
         return self._data.shape[1]
 
     @property
-    def _one_hot_labels(self):
+    def one_hot_labels(self):
         num_labels = self.data_count
         num_classes = self.labels_count
         index_offset = np.arange(num_labels) * num_classes
@@ -68,7 +68,7 @@ class DataSet(object):
         end = self._index_in_epoch
 
         if one_hot:
-            return self._data[start:end], self._one_hot_labels[start:end]
+            return self._data[start:end], self.one_hot_labels[start:end]
         else:
             return self._data[start:end], self._target[start:end]
 
