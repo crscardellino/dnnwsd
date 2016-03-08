@@ -43,7 +43,7 @@ for corpus_index, annotated_corpus in enumerate(annotated_corpus_directory_itera
 
     vec_processor.instances()
 
-    annotated_dataset = dict(data=vec_processor.dataset, target=vec_processor.target)
+    annotated_dataset = dict(data=vec_processor.dataset, target=vec_processor.target, labels=vec_processor.labels)
     sentences_ids = []
     unannotated_sentences = {}
 

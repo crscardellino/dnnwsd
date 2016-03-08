@@ -42,7 +42,7 @@ for corpus_index, annotated_corpus in enumerate(annotated_corpus_directory_itera
                                                            semisupervised_features_path)
     bow_processor.instances()
     
-    annotated_dataset = dict(data=bow_processor.dataset, target=bow_processor.target)
+    annotated_dataset = dict(data=bow_processor.dataset, target=bow_processor.target, labels=bow_processor.labels)
     sentences_ids = []
     unannotated_sentences = {}
     
