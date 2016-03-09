@@ -108,8 +108,11 @@ class LadderNetworksPipeline(object):
                     logger.info(u"Running repetition {}".format(repetition + 1))
 
                     with tf.Graph().as_default() as g:
+                        layers = copy.copy(self._layers[experiment])
+                        denoising_cost = copy.copy(self._denoising_cost[experiment])
+
                         ladder_experiment = LadderNetworksExperiment(
-                            dataset_path, self._layers[experiment], self._denoising_cost[experiment],
+                            dataset_path, layers, denoising_cost,
                             epochs=self._epochs, noise_std=self._noise_std,
                             starter_learning_rate=self._starter_learning_rate, train_ratio=self._train_ratio,
                             test_ratio=self._test_ratio, validation_ratio=self._validation_ratio
