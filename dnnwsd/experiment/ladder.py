@@ -398,7 +398,7 @@ class LadderNetworksExperiment(object):
 
                 if (i > 1) and ((i+1) % (self._num_iter/self._num_epochs) == 0):
                     epoch_n = i/(self._num_examples/self._batch_size)
-                    saver.save(sess, '{}/model.ckpt'.format(self._checkpoint_path), epoch_n)
+                    # saver.save(sess, '{}/model.ckpt'.format(self._checkpoint_path), epoch_n)
 
                     if self._dataset.validation_ds:
                         y_true, y_pred, s_error = sess.run(
