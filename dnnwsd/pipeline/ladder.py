@@ -44,12 +44,12 @@ def _write_results(results, evaluations, results_path):
     validation_mcp = np.array(validation_mcp, dtype=np.float32).mean(axis=0)  # Initial and final validation_mcp mean
     validation_lcr = np.array(validation_lcr, dtype=np.float32).mean(axis=0)  # Initial and final validation_lcr mean
 
-    np.savetxt(os.path.join(results, 'accuracy'), accuracy, fmt='%.2f')
-    np.savetxt(os.path.join(results, 'mcp'), mcp, fmt='%.2f')
-    np.savetxt(os.path.join(results, 'lcr'), lcr, fmt='%.2f')
-    np.savetxt(os.path.join(results, 'validation_accuracy'), validation_accuracy, fmt='%.2f')
-    np.savetxt(os.path.join(results, 'validation_mcp'), validation_mcp, fmt='%.2f')
-    np.savetxt(os.path.join(results, 'validation_lcr'), validation_lcr, fmt='%.2f')
+    np.savetxt(os.path.join(results_path, 'accuracy'), accuracy, fmt='%.2f')
+    np.savetxt(os.path.join(results_path, 'mcp'), mcp, fmt='%.2f')
+    np.savetxt(os.path.join(results_path, 'lcr'), lcr, fmt='%.2f')
+    np.savetxt(os.path.join(results_path, 'validation_accuracy'), validation_accuracy, fmt='%.2f')
+    np.savetxt(os.path.join(results_path, 'validation_mcp'), validation_mcp, fmt='%.2f')
+    np.savetxt(os.path.join(results_path, 'validation_lcr'), validation_lcr, fmt='%.2f')
 
     for eidx, evaluation in enumerate(evaluations):
         epath = os.path.join(results_path, 'evaluations', '{:02d}.txt'.format(eidx))
