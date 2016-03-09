@@ -17,7 +17,7 @@ logger = logging.getLogger(__name__)
 
 
 class LadderNetworksExperiment(object):
-    def __init__(self, dataset_path, layers, denoising_cost, checkpoint_path, repetitions=5,
+    def __init__(self, dataset_path, layers, denoising_cost, checkpoint_path,
                  epochs=50, noise_std=0.3, starter_learning_rate=0.02,
                  train_ratio=0.8, test_ratio=0.1, validation_ratio=0.1):
 
@@ -72,6 +72,9 @@ class LadderNetworksExperiment(object):
         # total cost (loss function)
         self._loss = self._scost + self._ucost
 
+        # prediction error of supervised dataset
+        self._supervised_error = -tf.reduce_mean(tf.reduce_sum(self._outputs*tf.log(self._y), 1))
+
         # y_true and y_pred used to get the metrics
         self._y_true = tf.argmax(self._outputs, 1)
         self._y_pred = tf.argmax(self._y, 1)
@@ -101,8 +104,7 @@ class LadderNetworksExperiment(object):
             initial_lcr=0,
             final_lcr=0,
             validation_lcr=[],
-            supervised_error=[],
-            total_error=[]
+            supervised_error=[]
         )
 
         # evaluation_sentences
@@ -131,7 +133,7 @@ class LadderNetworksExperiment(object):
     def dataset(self):
         return self._dataset
 
-    def _add_result(self, y_true, y_pred, supervised_error, total_error, phase):
+    def _add_result(self, y_true, y_pred, supervised_error, phase):
         assert phase in {'initial', 'final', 'validation'}
 
         accuracy = accuracy_score(y_true, y_pred)
@@ -151,7 +153,6 @@ class LadderNetworksExperiment(object):
             self._results['validation_lcr'].append(lcr)
 
         self._results['supervised_error'].append(supervised_error)
-        self._results['total_error'].append(total_error)
 
     def _build_network(self):
         logger.info(u"Building network")
@@ -382,10 +383,10 @@ class LadderNetworksExperiment(object):
 
             logger.info(u"Training start")
 
-            y_true, y_pred, scost, loss = sess.run(
-                [self._y_true, self._y_pred, self._scost, self._loss], feed_dict=test_dict
+            y_true, y_pred, s_error = sess.run(
+                [self._y_true, self._y_pred, self._supervised_error], feed_dict=test_dict
             )
-            self._add_result(y_true, y_pred, scost, loss, 'initial')
+            self._add_result(y_true, y_pred, s_error, 'initial')
             logger.info(u"Initial test accuracy: {}".format(self._results['initial_accuracy']))
             logger.info(u"Initial test mcp: {}".format(self._results['initial_mcp']))
             logger.info(u"Initial test lcr: {}".format(self._results['initial_lcr']))
@@ -405,10 +406,10 @@ class LadderNetworksExperiment(object):
                     saver.save(sess, '{}/model.ckpt'.format(self._checkpoint_path), epoch_n)
 
                     if self._dataset.validation_ds:
-                        y_true, y_pred, scost, loss = sess.run(
-                            [self._y_true, self._y_pred, self._scost, self._loss], feed_dict=validation_dict
+                        y_true, y_pred, s_error = sess.run(
+                            [self._y_true, self._y_pred, self._supervised_error], feed_dict=validation_dict
                         )
-                        self._add_result(y_true, y_pred, scost, loss, 'validation')
+                        self._add_result(y_true, y_pred, s_error, 'validation')
                         logger.info(u"Epoch {} - Validation accuracy: {}"
                                     .format(epoch_n, self._results['validation_accuracy'][-1]))
                         logger.info(u"Epoch {} - Validation mcp: {}"
@@ -432,10 +433,10 @@ class LadderNetworksExperiment(object):
                         zip(eval_sent, y_pred)
                     )
 
-            y_true, y_pred, scost, loss = sess.run(
-                [self._y_true, self._y_pred, self._scost, self._loss], feed_dict=test_dict
+            y_true, y_pred, s_error = sess.run(
+                [self._y_true, self._y_pred, self._supervised_error], feed_dict=test_dict
             )
-            self._add_result(y_true, y_pred, scost, loss, 'final')
+            self._add_result(y_true, y_pred, s_error, 'final')
             logger.info(u"Final test accuracy: {}".format(self._results['final_accuracy']))
             logger.info(u"Final test mcp: {}".format(self._results['final_mcp']))
             logger.info(u"Final test lcr: {}".format(self._results['final_lcr']))
