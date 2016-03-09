@@ -23,7 +23,10 @@ class DataSet(object):
     
     @property
     def data(self):
-        return self._data
+        if hasattr(self._data, 'todense'):
+            return self._data.todense()
+        else:
+            return self._data
 
     @property
     def target(self):
