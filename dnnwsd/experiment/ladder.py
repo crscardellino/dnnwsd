@@ -96,7 +96,7 @@ class LadderNetworksExperiment(object):
 
         self._results = dict(
             initial_accuracy=0,
-            final_accuray=0,
+            final_accuracy=0,
             validation_accuracy=[],
             initial_mcp=0,
             final_mcp=0,
