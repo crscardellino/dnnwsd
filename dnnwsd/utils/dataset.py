@@ -120,6 +120,11 @@ class DataSets(object):
         unannotated_data = dataset['unannotated_dataset']['data']
         unannotated_target_sentences = dataset['unannotated_dataset']['sentences']
 
+        perm = np.arange(unannotated_data.shape[0])
+        np.random.shuffle(perm)
+        unannotated_data = unannotated_data[perm]
+        unannotated_target_sentences = unannotated_target_sentences[perm]
+
         if annotated_data.max() > 1 or unannotated_data.max() > 1:  # Normalize dataset
             max_value = max(annotated_data.max(), unannotated_data.max())
 

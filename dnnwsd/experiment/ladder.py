@@ -387,10 +387,10 @@ class LadderNetworksExperiment(object):
                 [self._y_true, self._y_pred, self._supervised_error], feed_dict=test_dict
             )
             self._add_result(y_true, y_pred, s_error, 'initial')
-            logger.info(u"Initial test accuracy: {}".format(self._results['initial_accuracy']))
-            logger.info(u"Initial test mcp: {}".format(self._results['initial_mcp']))
-            logger.info(u"Initial test lcr: {}".format(self._results['initial_lcr']))
-            logger.info(u"Initial supervised error: {}".format(self._results['supervised_error'][0]))
+            logger.info(u"Initial test accuracy: {:.2f}".format(self._results['initial_accuracy']))
+            logger.info(u"Initial test mcp: {:.2f}".format(self._results['initial_mcp']))
+            logger.info(u"Initial test lcr: {:.2f}".format(self._results['initial_lcr']))
+            logger.info(u"Initial supervised error: {:.2f}".format(self._results['supervised_error'][0]))
 
             for i in tqdm.tqdm(range(i_iter, self._num_iter)):
                 data, target = self._dataset.train_ds.next_batch(self._batch_size)
@@ -409,13 +409,13 @@ class LadderNetworksExperiment(object):
                             [self._y_true, self._y_pred, self._supervised_error], feed_dict=validation_dict
                         )
                         self._add_result(y_true, y_pred, s_error, 'validation')
-                        logger.info(u"Epoch {} - Validation accuracy: {}"
+                        logger.info(u"Epoch {} - Validation accuracy: {:.2f}"
                                     .format(epoch_n, self._results['validation_accuracy'][-1]))
-                        logger.info(u"Epoch {} - Validation mcp: {}"
+                        logger.info(u"Epoch {} - Validation mcp: {:.2f}"
                                     .format(epoch_n, self._results['validation_mcp'][-1]))
-                        logger.info(u"Epoch {} - Validation lcr: {}"
+                        logger.info(u"Epoch {} - Validation lcr: {:.2f}"
                                     .format(epoch_n, self._results['validation_lcr'][-1]))
-                        logger.info(u"Epoch {} - Validation supervised error: {}"
+                        logger.info(u"Epoch {} - Validation supervised error: {:.2f}"
                                     .format(epoch_n, self._results['supervised_error'][-1]))
 
                     logger.info(u"Selecting unannotated data for manual evaluation")
@@ -434,8 +434,8 @@ class LadderNetworksExperiment(object):
                 [self._y_true, self._y_pred, self._supervised_error], feed_dict=test_dict
             )
             self._add_result(y_true, y_pred, s_error, 'final')
-            logger.info(u"Final test accuracy: {}".format(self._results['final_accuracy']))
-            logger.info(u"Final test mcp: {}".format(self._results['final_mcp']))
-            logger.info(u"Final test lcr: {}".format(self._results['final_lcr']))
-            logger.info(u"Final supervised error: {}".format(self._results['supervised_error'][-1]))
+            logger.info(u"Final test accuracy: {:.2f}".format(self._results['final_accuracy']))
+            logger.info(u"Final test mcp: {:.2f}".format(self._results['final_mcp']))
+            logger.info(u"Final test lcr: {:.2f}".format(self._results['final_lcr']))
+            logger.info(u"Final supervised error: {:.2f}".format(self._results['supervised_error'][-1]))
 
