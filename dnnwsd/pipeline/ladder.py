@@ -60,7 +60,7 @@ def _write_results(results, evaluations, results_path):
                 f.write("{}\n".format("="*13))
 
                 for sentence in sentences:
-                    f.write(sentence.encode("utf-8"))
+                    f.write(sentence.encode("utf-8") + "\n")
 
                 f.write("\n\n")
 
