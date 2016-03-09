@@ -17,15 +17,13 @@ logger = logging.getLogger(__name__)
 
 
 class LadderNetworksExperiment(object):
-    def __init__(self, dataset_path, layers, denoising_cost, checkpoint_path,
-                 epochs=50, noise_std=0.3, starter_learning_rate=0.02,
+    def __init__(self, dataset_path, layers, denoising_cost, epochs=50,
+                 noise_std=0.3, starter_learning_rate=0.02,
                  train_ratio=0.8, test_ratio=0.1, validation_ratio=0.1):
 
         self._dataset = DataSets(dataset_path, train_ratio, test_ratio, validation_ratio)
 
         logger.info(u"Dataset for lemma {} loaded.".format(self._dataset.lemma))
-
-        self._checkpoint_path = checkpoint_path
 
         self._input_size = self._dataset.train_ds.annotated_ds.vector_length
         self._output_size = self._dataset.train_ds.annotated_ds.labels_count
@@ -118,8 +116,6 @@ class LadderNetworksExperiment(object):
         bn_updates = tf.group(*self._bn_assigns)
         with tf.control_dependencies([self._train_step]):
             self._train_step = tf.group(bn_updates)
-
-        self._run()  # Run the training
 
     @property
     def results(self):
@@ -345,30 +341,30 @@ class LadderNetworksExperiment(object):
         z_est = (z_c - mu) * v + mu
         return z_est
 
-    def _run(self):
+    def run(self):
         logger.info(u"Running session")
 
         with tf.Session() as sess:
-            saver = tf.train.Saver()
+            # saver = tf.train.Saver()
             i_iter = 0
 
-            # get latest checkpoint (if any)
-            ckpt = tf.train.get_checkpoint_state(self._checkpoint_path)
+            # get latest checkpoint (if any) (not applicable now)
+            # ckpt = tf.train.get_checkpoint_state(self._checkpoint_path)
 
-            if ckpt and ckpt.model_checkpoint_path:
-                logger.info(u"Restoring training session from checkpoint")
-                # if checkpoint exists, restore the parameters and set epoch_n and i_iter
-                saver.restore(sess, ckpt.model_checkpoint_path)
-                epoch_n = int(ckpt.model_checkpoint_path.split('-')[1])
+            # if ckpt and ckpt.model_checkpoint_path:
+            #     logger.info(u"Restoring training session from checkpoint")
+            #     # if checkpoint exists, restore the parameters and set epoch_n and i_iter
+            #     saver.restore(sess, ckpt.model_checkpoint_path)
+            #     epoch_n = int(ckpt.model_checkpoint_path.split('-')[1])
 
-                i_iter = (epoch_n+1) * (self._num_examples/self._batch_size)
-                logger.info(u"Restored Epoch {}".format(epoch_n))
-            else:
-                # no checkpoint exists. create checkpoints directory if it does not exist.
-                if not os.path.exists(self._checkpoint_path):
-                    os.makedirs(self._checkpoint_path)
-                init = tf.initialize_all_variables()
-                sess.run(init)
+            #     i_iter = (epoch_n+1) * (self._num_examples/self._batch_size)
+            #     logger.info(u"Restored Epoch {}".format(epoch_n))
+            # else:
+            #     # no checkpoint exists. create checkpoints directory if it does not exist.
+            #     if not os.path.exists(self._checkpoint_path):
+            #         os.makedirs(self._checkpoint_path)
+            init = tf.initialize_all_variables()
+            sess.run(init)
 
             test_dict = {
                 self._inputs: self._dataset.test_ds.data,
