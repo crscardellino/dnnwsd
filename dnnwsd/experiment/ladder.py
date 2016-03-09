@@ -378,7 +378,7 @@ class LadderNetworksExperiment(object):
             if self._dataset.validation_ds:
                 validation_dict = {
                     self._inputs: self._dataset.validation_ds.data,
-                    self._outputs: self._dataset.validation_ds.one_host_labels
+                    self._outputs: self._dataset.validation_ds.one_hot_labels
                 }
 
             logger.info(u"Training start")
