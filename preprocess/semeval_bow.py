@@ -19,8 +19,8 @@ from dnnwsd.corpus import semeval, unannotated
 from dnnwsd.processor import bowprocessor
 
 annotated_corpus_directory = "../resources/semeval/lexelts"
-unannotated_corpus_directory = "../../wikicorpus/en/wikicorpus_lemmas_sample_15k/"
-corpus_datasets_dir = "../resources/corpus_datasets/en/15k/bow"
+unannotated_corpus_directory = "../../wikicorpus/en/wikicorpus_lemmas_sample_7k/"
+corpus_datasets_dir = "../resources/corpus_datasets/en/7k/bow"
 
 annotated_corpus_directory_iterator = semeval.SemevalCorpusDirectoryIterator(annotated_corpus_directory)
 unannotated_corpus_directory_iterator = unannotated.UnannotatedCorpusDirectoryIterator(unannotated_corpus_directory)

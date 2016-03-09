@@ -21,9 +21,9 @@ from dnnwsd.corpus import sensem, unannotated
 from dnnwsd.processor import vecprocessor
 
 annotated_corpus_directory = "../resources/sensem/"
-unannotated_corpus_directory = "../../wikicorpus/es/wikicorpus_lemmas_sample_15k/"
+unannotated_corpus_directory = "../../wikicorpus/es/wikicorpus_lemmas_sample_7k/"
 pos_tags_file = "../resources/semisupervised_features/es/pos_tags"
-corpus_datasets_dir = "../resources/corpus_datasets/es/15k/vecpos"
+corpus_datasets_dir = "../resources/corpus_datasets/es/7k/vecpos"
 
 annotated_corpus_directory_iterator = sensem.SenSemCorpusDirectoryIterator(annotated_corpus_directory)
 unannotated_corpus_directory_iterator = unannotated.UnannotatedCorpusDirectoryIterator(unannotated_corpus_directory,

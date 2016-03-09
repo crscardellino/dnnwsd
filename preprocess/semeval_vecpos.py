@@ -21,9 +21,9 @@ from dnnwsd.corpus import semeval, unannotated
 from dnnwsd.processor import vecprocessor
 
 annotated_corpus_directory = "../resources/semeval/lexelts"
-unannotated_corpus_directory = "../../wikicorpus/en/wikicorpus_lemmas_sample_15k/"
+unannotated_corpus_directory = "../../wikicorpus/en/wikicorpus_lemmas_sample_7k/"
 pos_tags_file = "../resources/semisupervised_features/en/pos_tags"
-corpus_datasets_dir = "../resources/corpus_datasets/en/15k/vecpos"
+corpus_datasets_dir = "../resources/corpus_datasets/en/7k/vecpos"
 
 annotated_corpus_directory_iterator = semeval.SemevalCorpusDirectoryIterator(annotated_corpus_directory)
 unannotated_corpus_directory_iterator = unannotated.UnannotatedCorpusDirectoryIterator(unannotated_corpus_directory,
