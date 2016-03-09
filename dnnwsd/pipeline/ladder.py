@@ -5,6 +5,7 @@ import logging
 import numpy as np
 import os
 import shutil
+import tensorflow as tf
 import unicodedata
 
 from ..experiment.ladder import LadderNetworksExperiment
@@ -106,33 +107,34 @@ class LadderNetworksPipeline(object):
                 for repetition in xrange(self._repetitions):
                     logger.info(u"Running repetition {}".format(repetition + 1))
 
-                    ladder_experiment = LadderNetworksExperiment(
-                        dataset_path, self._layers[experiment], self._denoising_cost[experiment],
-                        epochs=self._epochs, noise_std=self._noise_std,
-                        starter_learning_rate=self._starter_learning_rate, train_ratio=self._train_ratio,
-                        test_ratio=self._test_ratio, validation_ratio=self._validation_ratio
-                    )
+                    with tf.Graph().as_default() as g:
+                        ladder_experiment = LadderNetworksExperiment(
+                            dataset_path, self._layers[experiment], self._denoising_cost[experiment],
+                            epochs=self._epochs, noise_std=self._noise_std,
+                            starter_learning_rate=self._starter_learning_rate, train_ratio=self._train_ratio,
+                            test_ratio=self._test_ratio, validation_ratio=self._validation_ratio
+                        )
 
-                    ladder_experiment.run()
+                        ladder_experiment.run()
 
-                    logger.info(u"Finished experiments for repetition {} - {} experiment - lemma {}".format(
-                        repetition, experiment_name, self._lemmas[dataset_index]
-                    ))
+                        logger.info(u"Finished experiments for repetition {} - {} experiment - lemma {}".format(
+                            repetition+1, experiment_name, self._lemmas[dataset_index]
+                        ))
 
-                    results.append(
-                        copy.deepcopy(ladder_experiment.results)
-                    )
+                        results.append(
+                            copy.deepcopy(ladder_experiment.results)
+                        )
 
-                    evaluations.append([])  # repetition evaluations
-                    for (eidx, epoch) in enumerate(ladder_experiment.evaluation_sentences):
-                        evaluations[repetition].append([])  # epoch evaluations
-                        for (eval_sent, y_pred) in epoch:
-                            raw_sentence = ladder_experiment.dataset[eval_sent]
-                            sense = ladder_experiment.dataset.labels[y_pred]
+                        evaluations.append([])  # repetition evaluations
+                        for (eidx, epoch) in enumerate(ladder_experiment.evaluation_sentences):
+                            evaluations[repetition].append([])  # epoch evaluations
+                            for (eval_sent, y_pred) in epoch:
+                                raw_sentence = ladder_experiment.dataset[eval_sent]
+                                sense = ladder_experiment.dataset.labels[y_pred]
 
-                            evaluations[repetition][eidx].append(
-                                u"{} -- {}".format(sense, raw_sentence)
-                            )
+                                evaluations[repetition][eidx].append(
+                                    u"{} -- {}".format(sense, raw_sentence)
+                                )
 
                 logger.info(u"Finished all the {} experiment repetitions".format(experiment_name))
 
