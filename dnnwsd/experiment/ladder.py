@@ -391,7 +391,6 @@ class LadderNetworksExperiment(object):
             logger.info(u"Initial test mcp: {}".format(self._results['initial_mcp']))
             logger.info(u"Initial test lcr: {}".format(self._results['initial_lcr']))
             logger.info(u"Initial supervised error: {}".format(self._results['supervised_error'][0]))
-            logger.info(u"Initial total error: {}".format(self._results['total_error'][0]))
 
             for i in tqdm.tqdm(range(i_iter, self._num_iter)):
                 data, target = self._dataset.train_ds.next_batch(self._batch_size)
@@ -418,8 +417,6 @@ class LadderNetworksExperiment(object):
                                     .format(epoch_n, self._results['validation_lcr'][-1]))
                         logger.info(u"Epoch {} - Validation supervised error: {}"
                                     .format(epoch_n, self._results['supervised_error'][-1]))
-                        logger.info(u"Epoch {} - Validation total error: {}"
-                                    .format(epoch_n, self._results['total_error'][-1]))
 
                     logger.info(u"Selecting unannotated data for manual evaluation")
                     # selecting 10 random unannotated instances for classification and manual evaluation
@@ -441,5 +438,4 @@ class LadderNetworksExperiment(object):
             logger.info(u"Final test mcp: {}".format(self._results['final_mcp']))
             logger.info(u"Final test lcr: {}".format(self._results['final_lcr']))
             logger.info(u"Final supervised error: {}".format(self._results['supervised_error'][-1]))
-            logger.info(u"Final total error: {}".format(self._results['total_error'][-1]))
 
