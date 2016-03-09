@@ -54,7 +54,7 @@ def _write_results(results, evaluations, results_path):
     for eidx, evaluation in enumerate(evaluations):
         epath = os.path.join(results_path, 'evaluations', '{:02d}.txt'.format(eidx))
         with open(epath, 'w') as f:
-            for epoch, sentences in evaluation:
+            for epoch, sentences in enumerate(evaluation):
                 f.write("{}\n".format("="*13))
                 f.write("Iteration {:03d}\n".format(epoch))
                 f.write("{}\n".format("="*13))
