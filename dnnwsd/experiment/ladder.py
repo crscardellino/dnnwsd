@@ -377,7 +377,7 @@ class LadderNetworksExperiment(object):
                     dataset, self._results['{}_mcp'.format(dataset)][-1])
                 )
                 logger.info(u"Initial {} lcr: {:.2f}".format(
-                    dataset, self._results['{}_lcr'.format(dataset)[-1]])
+                    dataset, self._results['{}_lcr'.format(dataset)][-1])
                 )
 
             for i in tqdm.tqdm(range(i_iter, self._num_iter)):
@@ -404,7 +404,7 @@ class LadderNetworksExperiment(object):
                                 epoch_n, dataset, self._results['{}_mcp'.format(dataset)][-1])
                         )
                         logger.info(u"Epoch {} - {} lcr: {:.2f}".format(
-                                epoch_n, dataset, self._results['{}_lcr'.format(dataset)[-1]])
+                                epoch_n, dataset, self._results['{}_lcr'.format(dataset)][-1])
                         )
 
                     logger.info(u"Selecting unannotated data for manual evaluation")
@@ -435,6 +435,6 @@ class LadderNetworksExperiment(object):
                         dataset, self._results['{}_mcp'.format(dataset)][-1])
                 )
                 logger.info(u"Final {} lcr: {:.2f}".format(
-                        dataset, self._results['{}_lcr'.format(dataset)[-1]])
+                        dataset, self._results['{}_lcr'.format(dataset)][-1])
                 )
 
