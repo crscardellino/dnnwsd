@@ -21,7 +21,7 @@ class MultilayerPerceptron(object):
     Multilayer Perceptron experiments which emulates a clean encoder
     of a Ladder Network. Useful to check if we can overfit the training data.
     """
-    def __init__(self, dataset_path, layers, epochs, starter_learning_rate,
+    def __init__(self, dataset_path, layers, epochs, starter_learning_rate, noise_std,
                  train_ratio, test_ratio, validation_ratio):
         dataset = DataSets(dataset_path, train_ratio, test_ratio, validation_ratio)
 
@@ -29,6 +29,8 @@ class MultilayerPerceptron(object):
         self._train_ds = dataset.train_ds.annotated_ds
         self._test_ds = dataset.test_ds
         self._validation_ds = dataset.validation_ds
+
+        self._noise_std = noise_std
 
         logger.info(u"Dataset for lemma {} loaded.".format(self._lemma))
 
@@ -118,9 +120,7 @@ class MultilayerPerceptron(object):
         self._running_mean = [tf.Variable(tf.constant(0.0, shape=[l]), trainable=False) for l in self._layers[1:]]
         self._running_var = [tf.Variable(tf.constant(1.0, shape=[l]), trainable=False) for l in self._layers[1:]]
 
-        noise_std = 0.3
-
-        h = self._inputs + tf.random_normal(tf.shape(self._inputs)) * noise_std
+        h = self._inputs + tf.random_normal(tf.shape(self._inputs)) * self._noise_std
         h_clean = self._inputs
 
         for l in range(1, self._L+1):
@@ -135,7 +135,7 @@ class MultilayerPerceptron(object):
             z_clean = self._update_batch_normalization(z_pre_clean, l)
             mean, var = tf.nn.moments(z_pre, axes=[0])
             z = (z_pre - mean) / tf.sqrt(var + tf.constant(1e-10))
-            z += tf.random_normal(tf.shape(z_pre)) * noise_std
+            z += tf.random_normal(tf.shape(z_pre)) * self._noise_std
 
             if l == self._L:
                 # use softmax activation in output layer
@@ -217,7 +217,7 @@ class MultilayerPerceptron(object):
                     self._results['train_error'].append(train_error)
                     logger.info(u"Initial train error: {:.2f}".format(self._results['train_error'][-1]))
 
-            for epoch in tqdm.tqdm(range(self._epochs)):
+            for epoch in xrange(self._epochs):
                 data, target = self._train_ds.next_batch(self._batch_size)
 
                 sess.run(self._train_step, feed_dict={
@@ -225,7 +225,7 @@ class MultilayerPerceptron(object):
                     self._outputs: target
                 })
 
-                for dataset in ['train', 'test', 'validation']:
+                for dataset in ['train', 'validation']:
                     feed_dict = feed_dicts[dataset]
 
                     y_true, y_pred = sess.run(
