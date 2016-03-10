@@ -18,7 +18,7 @@ logger = logging.getLogger(__name__)
 class LadderNetworksExperiment(object):
     def __init__(self, dataset_or_path, layers, denoising_cost, epochs=50,
                  noise_std=0.3, starter_learning_rate=0.02, evaluation_amount=10, validation_threshold=0.75,
-                 train_ratio=0.8, test_ratio=0.1, validation_ratio=0.1, dropout_ratio=0.0):
+                 train_ratio=0.8, test_ratio=0.1, validation_ratio=0.1):
         assert train_ratio > 0 and test_ratio > 0 and validation_ratio > 0  # We need the three sets
 
         if type(dataset_or_path) == str:
@@ -45,7 +45,6 @@ class LadderNetworksExperiment(object):
 
         self._noise_std = noise_std  # scaling factor for noise used in corrupted encoder
         self._denoising_cost = denoising_cost  # hyperparameters that denote the importance of each layer
-        self._dropout_ratio = dropout_ratio
         self._validation_threshold = validation_threshold
 
         # functions to join and split annotated and unannotated corpus
@@ -276,10 +275,6 @@ class LadderNetworksExperiment(object):
                 # use ReLU activation in hidden layers
                 h = tf.nn.relu(z + self._weights["beta"][l-1])
 
-            self._keep_ratio = tf.placeholder(tf.float32)
-            if self._dropout_ratio > 0 and noise_std > 0:  # add dropout layer for corrupted encoder to regularize
-                h = tf.nn.dropout(h, self._keep_ratio)
-
             layer_data['annotated']['z'][l], layer_data['unannotated']['z'][l] = self._split_lu(z)
 
             # save mean and variance of unannotated examples for decoding
@@ -372,7 +367,7 @@ class LadderNetworksExperiment(object):
                 feed_dict = feed_dicts[dataset]
 
                 y_true, y_pred = sess.run(
-                        [self._y_true, self._y_pred], feed_dict=feed_dict
+                    [self._y_true, self._y_pred], feed_dict=feed_dict
                 )
 
                 self._add_result(y_true, y_pred, dataset)
@@ -392,8 +387,7 @@ class LadderNetworksExperiment(object):
 
                 _, error = sess.run([self._train_step, self._loss], feed_dict={
                     self._inputs: data,
-                    self._outputs: target,
-                    self._keep_ratio: 1.0 - self._dropout_ratio
+                    self._outputs: target
                 })
 
                 if (i > 1) and ((i+1) % (self._num_iter/self._num_epochs) == 0):
@@ -405,19 +399,19 @@ class LadderNetworksExperiment(object):
                         feed_dict = feed_dicts[dataset]
 
                         y_true, y_pred = sess.run(
-                                [self._y_true, self._y_pred], feed_dict=feed_dict
+                            [self._y_true, self._y_pred], feed_dict=feed_dict
                         )
 
                         self._add_result(y_true, y_pred, dataset)
 
                         logger.info(u"Epoch {} - {} accuracy: {:.2f}".format(
-                                epoch_n, dataset, self._results['{}_accuracy'.format(dataset)][-1])
+                            epoch_n, dataset, self._results['{}_accuracy'.format(dataset)][-1])
                         )
                         logger.info(u"Epoch {} - {} mcp: {:.2f}".format(
-                                epoch_n, dataset, self._results['{}_mcp'.format(dataset)][-1])
+                            epoch_n, dataset, self._results['{}_mcp'.format(dataset)][-1])
                         )
                         logger.info(u"Epoch {} - {} lcr: {:.2f}".format(
-                                epoch_n, dataset, self._results['{}_lcr'.format(dataset)][-1])
+                            epoch_n, dataset, self._results['{}_lcr'.format(dataset)][-1])
                         )
 
                     logger.info(u"Selecting unannotated data for manual evaluation")
@@ -441,18 +435,18 @@ class LadderNetworksExperiment(object):
                 feed_dict = feed_dicts[dataset]
 
                 y_true, y_pred = sess.run(
-                        [self._y_true, self._y_pred], feed_dict=feed_dict
+                    [self._y_true, self._y_pred], feed_dict=feed_dict
                 )
 
                 self._add_result(y_true, y_pred, dataset)
 
                 logger.info(u"Final {} accuracy: {:.2f}".format(
-                        dataset, self._results['{}_accuracy'.format(dataset)][-1])
+                    dataset, self._results['{}_accuracy'.format(dataset)][-1])
                 )
                 logger.info(u"Final {} mcp: {:.2f}".format(
-                        dataset, self._results['{}_mcp'.format(dataset)][-1])
+                    dataset, self._results['{}_mcp'.format(dataset)][-1])
                 )
                 logger.info(u"Final {} lcr: {:.2f}".format(
-                        dataset, self._results['{}_lcr'.format(dataset)][-1])
+                    dataset, self._results['{}_lcr'.format(dataset)][-1])
                 )
 
