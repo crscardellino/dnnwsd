@@ -390,7 +390,7 @@ class LadderNetworksExperiment(object):
             for i in tqdm.tqdm(range(i_iter, self._num_iter)):
                 data, target = self._dataset.train_ds.next_batch(self._batch_size)
 
-                sess.run(self._train_step, feed_dict={
+                _, error = sess.run([self._train_step, self._loss], feed_dict={
                     self._inputs: data,
                     self._outputs: target,
                     self._keep_ratio: 1.0 - self._dropout_ratio
@@ -398,6 +398,8 @@ class LadderNetworksExperiment(object):
 
                 if (i > 1) and ((i+1) % (self._num_iter/self._num_epochs) == 0):
                     epoch_n = i/(self._num_examples/self._batch_size)
+
+                    logger.info(u"Epoch {} - error: {}".format(epoch_n, error))
 
                     for dataset in ['train', 'validation']:
                         feed_dict = feed_dicts[dataset]
