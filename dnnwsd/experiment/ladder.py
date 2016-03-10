@@ -16,11 +16,16 @@ logger = logging.getLogger(__name__)
 
 
 class LadderNetworksExperiment(object):
-    def __init__(self, dataset_path, layers, denoising_cost, epochs=50,
-                 noise_std=0.3, starter_learning_rate=0.02,
+    def __init__(self, dataset_or_path, layers, denoising_cost, epochs=50,
+                 noise_std=0.3, starter_learning_rate=0.02, evaluation_amount=10,
                  train_ratio=0.8, test_ratio=0.1, validation_ratio=0.1):
 
-        self._dataset = DataSets(dataset_path, train_ratio, test_ratio, validation_ratio)
+        if type(dataset_or_path) == str:
+            self._dataset = DataSets(dataset_or_path, train_ratio, test_ratio, validation_ratio)
+        elif type(dataset_or_path) == DataSets:
+            self._dataset = dataset_or_path
+        else:
+            raise Exception("Not a valid dataset or path")
 
         logger.info(u"Dataset for lemma {} loaded.".format(self._dataset.lemma))
 
@@ -89,18 +94,19 @@ class LadderNetworksExperiment(object):
         self._target_counts = [c[0] for c in Counter(full_target).most_common()]
 
         self._results = dict(
-            initial_accuracy=0,
-            final_accuracy=0,
+            train_accuracy=[],
+            test_accuracy=[],
             validation_accuracy=[],
-            initial_mcp=0,
-            final_mcp=0,
+            train_mcp=[],
+            test_mcp=[],
             validation_mcp=[],
-            initial_lcr=0,
-            final_lcr=0,
+            train_lcr=[],
+            test_lcr=[],
             validation_lcr=[]
         )
 
         # evaluation_sentences
+        self._evaluation_amount = evaluation_amount
         self._evaluation_sentences = []
 
         # train_step for the weight parameters, optimized with Adam
@@ -124,8 +130,8 @@ class LadderNetworksExperiment(object):
     def dataset(self):
         return self._dataset
 
-    def _add_result(self, y_true, y_pred, phase):
-        assert phase in {'initial', 'final', 'validation'}
+    def _add_result(self, y_true, y_pred, dataset):
+        assert dataset in {'train', 'test', 'validation'}
 
         accuracy = accuracy_score(y_true, y_pred)
         precision, recall, fscore, _ = precision_recall_fscore_support(
@@ -134,14 +140,9 @@ class LadderNetworksExperiment(object):
         mcp = precision[self._target_counts[0]]
         lcr = recall[self._target_counts[1:]].mean()
 
-        if phase == 'initial' or phase == 'final':
-            self._results['{}_accuracy'.format(phase)] = accuracy
-            self._results['{}_mcp'.format(phase)] = mcp
-            self._results['{}_lcr'.format(phase)] = lcr
-        else:
-            self._results['validation_accuracy'].append(accuracy)
-            self._results['validation_mcp'].append(mcp)
-            self._results['validation_lcr'].append(lcr)
+        self._results['{}_accuracy'.format(dataset)].append(accuracy)
+        self._results['{}_mcp'.format(dataset)].append(mcp)
+        self._results['{}_lcr'.format(dataset)].append(lcr)
 
     def _build_network(self):
         logger.info(u"Building network")
@@ -305,7 +306,7 @@ class LadderNetworksExperiment(object):
 
     @staticmethod
     def _batch_normalization(batch, mean=None, var=None):
-        if mean == None or var == None:
+        if mean is None or var is None:
             mean, var = tf.nn.moments(batch, axes=[0])
         return (batch - mean) / tf.sqrt(var + tf.constant(1e-10))
 
@@ -338,77 +339,79 @@ class LadderNetworksExperiment(object):
         logger.info(u"Running session")
 
         with tf.Session() as sess:
-            # saver = tf.train.Saver()
             i_iter = 0
 
-            # get latest checkpoint (if any) (not applicable now)
-            # ckpt = tf.train.get_checkpoint_state(self._checkpoint_path)
-
-            # if ckpt and ckpt.model_checkpoint_path:
-            #     logger.info(u"Restoring training session from checkpoint")
-            #     # if checkpoint exists, restore the parameters and set epoch_n and i_iter
-            #     saver.restore(sess, ckpt.model_checkpoint_path)
-            #     epoch_n = int(ckpt.model_checkpoint_path.split('-')[1])
-
-            #     i_iter = (epoch_n+1) * (self._num_examples/self._batch_size)
-            #     logger.info(u"Restored Epoch {}".format(epoch_n))
-            # else:
-            #     # no checkpoint exists. create checkpoints directory if it does not exist.
-            #     if not os.path.exists(self._checkpoint_path):
-            #         os.makedirs(self._checkpoint_path)
             init = tf.initialize_all_variables()
             sess.run(init)
 
-            test_dict = {
-                self._inputs: self._dataset.test_ds.data,
-                self._outputs: self._dataset.test_ds.one_hot_labels
-            }
-
-            if self._dataset.validation_ds:
-                validation_dict = {
+            feed_dicts = {
+                'train': {
+                    self._inputs: self._dataset.train_ds.annotated_ds.data,
+                    self._outputs: self._dataset.train_ds.annotated_ds.one_hot_labels
+                },
+                'test': {
+                    self._inputs: self._dataset.test_ds.data,
+                    self._outputs: self._dataset.test_ds.one_hot_labels
+                },
+                'validation': {
                     self._inputs: self._dataset.validation_ds.data,
                     self._outputs: self._dataset.validation_ds.one_hot_labels
                 }
+            }
 
             logger.info(u"Training start")
 
-            y_true, y_pred = sess.run(
-                [self._y_true, self._y_pred], feed_dict=test_dict
-            )
-            self._add_result(y_true, y_pred, 'initial')
-            logger.info(u"Initial test accuracy: {:.2f}".format(self._results['initial_accuracy']))
-            logger.info(u"Initial test mcp: {:.2f}".format(self._results['initial_mcp']))
-            logger.info(u"Initial test lcr: {:.2f}".format(self._results['initial_lcr']))
+            for dataset in ['train', 'test', 'validation']:
+                feed_dict = feed_dicts[dataset]
+
+                y_true, y_pred = sess.run(
+                        [self._y_true, self._y_pred], feed_dict=feed_dict
+                )
+
+                self._add_result(y_true, y_pred, dataset)
+
+                logger.info(u"Initial {} accuracy: {:.2f}".format(
+                    dataset, self._results['{}_accuracy'.format(dataset)][-1])
+                )
+                logger.info(u"Initial {} mcp: {:.2f}".format(
+                    dataset, self._results['{}_mcp'.format(dataset)][-1])
+                )
+                logger.info(u"Initial {} lcr: {:.2f}".format(
+                    dataset, self._results['{}_lcr'.format(dataset)[-1]])
+                )
 
             for i in tqdm.tqdm(range(i_iter, self._num_iter)):
                 data, target = self._dataset.train_ds.next_batch(self._batch_size)
 
-                sess.run(self._train_step, feed_dict={
-                    self._inputs: data,
-                    self._outputs: target
-                })
+                sess.run(self._train_step, feed_dict={self._inputs: data, self._outputs: target})
 
                 if (i > 1) and ((i+1) % (self._num_iter/self._num_epochs) == 0):
                     epoch_n = i/(self._num_examples/self._batch_size)
-                    # saver.save(sess, '{}/model.ckpt'.format(self._checkpoint_path), epoch_n)
 
-                    if self._dataset.validation_ds:
+                    for dataset in ['train', 'validation']:
+                        feed_dict = feed_dicts[dataset]
+
                         y_true, y_pred = sess.run(
-                            [self._y_true, self._y_pred], feed_dict=validation_dict
+                                [self._y_true, self._y_pred], feed_dict=feed_dict
                         )
-                        self._add_result(y_true, y_pred, 'validation')
-                        logger.info(u"Epoch {} - Validation accuracy: {:.2f}"
-                                    .format(epoch_n, self._results['validation_accuracy'][-1]))
-                        logger.info(u"Epoch {} - Validation mcp: {:.2f}"
-                                    .format(epoch_n, self._results['validation_mcp'][-1]))
-                        logger.info(u"Epoch {} - Validation lcr: {:.2f}"
-                                    .format(epoch_n, self._results['validation_lcr'][-1]))
+
+                        self._add_result(y_true, y_pred, dataset)
+
+                        logger.info(u"Epoch {} - {} accuracy: {:.2f}".format(
+                                epoch_n, dataset, self._results['{}_accuracy'.format(dataset)][-1])
+                        )
+                        logger.info(u"Epoch {} - mcp: {:.2f}".format(
+                                epoch_n, dataset, self._results['{}_mcp'.format(dataset)][-1])
+                        )
+                        logger.info(u"Epoch {} - {} lcr: {:.2f}".format(
+                                epoch_n, dataset, self._results['{}_lcr'.format(dataset)[-1]])
+                        )
 
                     logger.info(u"Selecting unannotated data for manual evaluation")
-                    # selecting 10 random unannotated instances for classification and manual evaluation
+                    # selecting evaluation_amount random unannotated instances for classification and manual evaluation
                     perm = np.arange(self._dataset.train_ds.unannotated_ds.data_count)
                     np.random.shuffle(perm)
-                    perm = perm[:10]
+                    perm = perm[:self._evaluation_amount]
                     eval_data = self._dataset.train_ds.unannotated_ds.data[perm]
                     eval_sent = self._dataset.train_ds.unannotated_ds.target[perm]
                     y_pred = sess.run(self._y_pred, feed_dict={self._inputs: eval_data})
@@ -416,11 +419,22 @@ class LadderNetworksExperiment(object):
                         zip(eval_sent, y_pred)
                     )
 
-            y_true, y_pred = sess.run(
-                [self._y_true, self._y_pred], feed_dict=test_dict
-            )
-            self._add_result(y_true, y_pred, 'final')
-            logger.info(u"Final test accuracy: {:.2f}".format(self._results['final_accuracy']))
-            logger.info(u"Final test mcp: {:.2f}".format(self._results['final_mcp']))
-            logger.info(u"Final test lcr: {:.2f}".format(self._results['final_lcr']))
+            for dataset in ['train', 'test', 'validation']:
+                feed_dict = feed_dicts[dataset]
+
+                y_true, y_pred = sess.run(
+                        [self._y_true, self._y_pred], feed_dict=feed_dict
+                )
+
+                self._add_result(y_true, y_pred, dataset)
+
+                logger.info(u"Final {} accuracy: {:.2f}".format(
+                        dataset, self._results['{}_accuracy'.format(dataset)][-1])
+                )
+                logger.info(u"Final {} mcp: {:.2f}".format(
+                        dataset, self._results['{}_mcp'.format(dataset)][-1])
+                )
+                logger.info(u"Final {} lcr: {:.2f}".format(
+                        dataset, self._results['{}_lcr'.format(dataset)[-1]])
+                )
 

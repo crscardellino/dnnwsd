@@ -22,31 +22,43 @@ def _write_results(results, evaluations, results_path):
     os.makedirs(results_path)
     os.makedirs(os.path.join(results_path, 'evaluations'))
 
-    accuracy = []
-    mcp = []
-    lcr = []
+    train_accuracy = []
+    train_mcp = []
+    train_lcr = []
+    test_accuracy = []
+    test_mcp = []
+    test_lcr = []
     validation_accuracy = []
     validation_mcp = []
     validation_lcr = []
 
     for result in results:
-        accuracy.append((result['initial_accuracy'], result['final_accuracy']))
-        mcp.append((result['initial_mcp'], result['final_mcp']))
-        lcr.append((result['initial_lcr'], result['final_lcr']))
+        train_accuracy.append(result['train_accuracy'])
+        train_mcp.append(result['train_mcp'])
+        train_lcr.append(result['train_lcr'])
+        test_accuracy.append(result['test_accuracy'])
+        test_mcp.append(result['test_mcp'])
+        test_lcr.append(result['test_lcr'])
         validation_accuracy.append(result['validation_accuracy'])
         validation_mcp.append(result['validation_mcp'])
         validation_lcr.append(result['validation_lcr'])
 
-    accuracy = np.array(accuracy, dtype=np.float32).mean(axis=0)  # Initial and final accuracy mean
-    mcp = np.array(mcp, dtype=np.float32).mean(axis=0)  # Initial and final mcp mean
-    lcr = np.array(lcr, dtype=np.float32).mean(axis=0)  # Initial and final lcr mean
-    validation_accuracy = np.array(validation_accuracy, dtype=np.float32).mean(axis=0) # Initial and final validation_accuracy mean
-    validation_mcp = np.array(validation_mcp, dtype=np.float32).mean(axis=0)  # Initial and final validation_mcp mean
-    validation_lcr = np.array(validation_lcr, dtype=np.float32).mean(axis=0)  # Initial and final validation_lcr mean
+    train_accuracy = np.array(train_accuracy, dtype=np.float32).mean(axis=0)
+    train_mcp = np.array(train_mcp, dtype=np.float32).mean(axis=0)
+    train_lcr = np.array(train_lcr, dtype=np.float32).mean(axis=0)
+    test_accuracy = np.array(test_accuracy, dtype=np.float32).mean(axis=0)
+    test_mcp = np.array(test_mcp, dtype=np.float32).mean(axis=0)
+    test_lcr = np.array(test_lcr, dtype=np.float32).mean(axis=0)
+    validation_accuracy = np.array(validation_accuracy, dtype=np.float32).mean(axis=0)
+    validation_mcp = np.array(validation_mcp, dtype=np.float32).mean(axis=0)
+    validation_lcr = np.array(validation_lcr, dtype=np.float32).mean(axis=0)
 
-    np.savetxt(os.path.join(results_path, 'accuracy'), accuracy, fmt='%.2f')
-    np.savetxt(os.path.join(results_path, 'mcp'), mcp, fmt='%.2f')
-    np.savetxt(os.path.join(results_path, 'lcr'), lcr, fmt='%.2f')
+    np.savetxt(os.path.join(results_path, 'train_accuracy'), train_accuracy, fmt='%.2f')
+    np.savetxt(os.path.join(results_path, 'train_mcp'), train_mcp, fmt='%.2f')
+    np.savetxt(os.path.join(results_path, 'train_lcr'), train_lcr, fmt='%.2f')
+    np.savetxt(os.path.join(results_path, 'test_accuracy'), test_accuracy, fmt='%.2f')
+    np.savetxt(os.path.join(results_path, 'test_mcp'), test_mcp, fmt='%.2f')
+    np.savetxt(os.path.join(results_path, 'test_lcr'), test_lcr, fmt='%.2f')
     np.savetxt(os.path.join(results_path, 'validation_accuracy'), validation_accuracy, fmt='%.2f')
     np.savetxt(os.path.join(results_path, 'validation_mcp'), validation_mcp, fmt='%.2f')
     np.savetxt(os.path.join(results_path, 'validation_lcr'), validation_lcr, fmt='%.2f')
