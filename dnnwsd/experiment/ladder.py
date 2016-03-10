@@ -18,7 +18,7 @@ logger = logging.getLogger(__name__)
 class LadderNetworksExperiment(object):
     def __init__(self, dataset_or_path, layers, denoising_cost, epochs=50,
                  noise_std=0.3, starter_learning_rate=0.02, evaluation_amount=10,
-                 train_ratio=0.8, test_ratio=0.1, validation_ratio=0.1):
+                 train_ratio=0.8, test_ratio=0.1, validation_ratio=0.1, dropout_ratio=0.0):
 
         if type(dataset_or_path) == str:
             self._dataset = DataSets(dataset_or_path, train_ratio, test_ratio, validation_ratio)
@@ -44,6 +44,7 @@ class LadderNetworksExperiment(object):
 
         self._noise_std = noise_std  # scaling factor for noise used in corrupted encoder
         self._denoising_cost = denoising_cost  # hyperparameters that denote the importance of each layer
+        self._dropout_ratio = dropout_ratio
 
         # functions to join and split annotated and unannotated corpus
         self._join = lambda a, u: tf.concat(0, [a, u])
@@ -54,10 +55,10 @@ class LadderNetworksExperiment(object):
         self._build_network()
 
         logger.info(u"Building corrupted encoder")
-        self._y_c, self._corrupted_encoder = self._encoder(self._inputs, self._noise_std)
+        self._y_c, self._corrupted_encoder = self._encoder(self._noise_std)
 
         logger.info(u"Building clean encoder")
-        _, self._clean_encoder = self._encoder(self._inputs, 0.0)
+        _, self._clean_encoder = self._encoder(0.0)
         # the y function is ignored as is only helpful for evaluation and classification
 
         # define the y function as the classification function
@@ -228,12 +229,12 @@ class LadderNetworksExperiment(object):
 
         return d_cost
 
-    def _encoder(self, inputs, noise_std):
+    def _encoder(self, noise_std):
         """
         encoder factory for training.
         """
         # add noise to input
-        h = inputs + tf.random_normal(tf.shape(inputs)) * noise_std
+        h = self._inputs + tf.random_normal(tf.shape(self._inputs)) * noise_std
 
         # dictionary to store the pre-activation, activation, mean and variance for each layer
         layer_data = dict()
@@ -272,6 +273,10 @@ class LadderNetworksExperiment(object):
             else:
                 # use ReLU activation in hidden layers
                 h = tf.nn.relu(z + self._weights["beta"][l-1])
+
+            self._keep_ratio = tf.placeholder("float")
+            if self._dropout_ratio > 0 and noise_std > 0:  # add dropout layer for corrupted encoder to regularize
+                h = tf.nn.dropout(h, self._keep_ratio)
 
             layer_data['annotated']['z'][l], layer_data['unannotated']['z'][l] = self._split_lu(z)
 
@@ -383,7 +388,11 @@ class LadderNetworksExperiment(object):
             for i in tqdm.tqdm(range(i_iter, self._num_iter)):
                 data, target = self._dataset.train_ds.next_batch(self._batch_size)
 
-                sess.run(self._train_step, feed_dict={self._inputs: data, self._outputs: target})
+                sess.run(self._train_step, feed_dict={
+                    self._inputs: data,
+                    self._outputs: target,
+                    self._keep_ratio: 1.0 - self._dropout_ratio
+                })
 
                 if (i > 1) and ((i+1) % (self._num_iter/self._num_epochs) == 0):
                     epoch_n = i/(self._num_examples/self._batch_size)
