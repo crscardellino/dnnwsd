@@ -121,16 +121,18 @@ class MultilayerPerceptron(object):
         noise_std = 0.3
 
         h = self._inputs + tf.random_normal(tf.shape(self._inputs)) * noise_std
+        h_clean = self._inputs
 
         for l in range(1, self._L+1):
             logger.info(u"Layer {}: {} -> {}".format(l, self._layers[l-1], self._layers[l]))
 
             # pre-activation
             z_pre = tf.matmul(h, self._weights['W'][l-1])
+            z_pre_clean = tf.matmul(h_clean, self._weights['W'][l-1])
 
             # batch normalization + update the average mean and variance
             # using batch mean and variance of annotated examples
-            # z = self._update_batch_normalization(z_pre, l)
+            z_clean = self._update_batch_normalization(z_pre_clean, l)
             mean, var = tf.nn.moments(z_pre, axes=[0])
             z = (z_pre - mean) / tf.sqrt(var + tf.constant(1e-10))
             z += tf.random_normal(tf.shape(z_pre)) * noise_std
@@ -138,9 +140,11 @@ class MultilayerPerceptron(object):
             if l == self._L:
                 # use softmax activation in output layer
                 h = tf.nn.softmax(self._weights['gamma'][l-1] * (z + self._weights["beta"][l-1]))
+                h_clean = tf.nn.softmax(self._weights['gamma'][l-1] * (z_clean + self._weights["beta"][l-1]))
             else:
                 # use ReLU activation in hidden layers
                 h = tf.nn.relu(z + self._weights["beta"][l-1])
+                h_clean = tf.nn.relu(z_clean + self._weights["beta"][l-1])
 
         return h
 
