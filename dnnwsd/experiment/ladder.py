@@ -3,7 +3,6 @@
 import logging
 import math
 import numpy as np
-import os
 import tensorflow as tf
 import tqdm
 
@@ -70,9 +69,6 @@ class LadderNetworksExperiment(object):
         # total cost (loss function)
         self._loss = self._scost + self._ucost
 
-        # prediction error of supervised dataset
-        self._supervised_error = -tf.reduce_mean(tf.reduce_sum(self._outputs*tf.log(self._y), 1))
-
         # y_true and y_pred used to get the metrics
         self._y_true = tf.argmax(self._outputs, 1)
         self._y_pred = tf.argmax(self._y, 1)
@@ -101,8 +97,7 @@ class LadderNetworksExperiment(object):
             validation_mcp=[],
             initial_lcr=0,
             final_lcr=0,
-            validation_lcr=[],
-            supervised_error=[]
+            validation_lcr=[]
         )
 
         # evaluation_sentences
@@ -129,7 +124,7 @@ class LadderNetworksExperiment(object):
     def dataset(self):
         return self._dataset
 
-    def _add_result(self, y_true, y_pred, supervised_error, phase):
+    def _add_result(self, y_true, y_pred, phase):
         assert phase in {'initial', 'final', 'validation'}
 
         accuracy = accuracy_score(y_true, y_pred)
@@ -147,8 +142,6 @@ class LadderNetworksExperiment(object):
             self._results['validation_accuracy'].append(accuracy)
             self._results['validation_mcp'].append(mcp)
             self._results['validation_lcr'].append(lcr)
-
-        self._results['supervised_error'].append(supervised_error)
 
     def _build_network(self):
         logger.info(u"Building network")
@@ -379,14 +372,13 @@ class LadderNetworksExperiment(object):
 
             logger.info(u"Training start")
 
-            y_true, y_pred, s_error = sess.run(
-                [self._y_true, self._y_pred, self._supervised_error], feed_dict=test_dict
+            y_true, y_pred = sess.run(
+                [self._y_true, self._y_pred], feed_dict=test_dict
             )
-            self._add_result(y_true, y_pred, s_error, 'initial')
+            self._add_result(y_true, y_pred, 'initial')
             logger.info(u"Initial test accuracy: {:.2f}".format(self._results['initial_accuracy']))
             logger.info(u"Initial test mcp: {:.2f}".format(self._results['initial_mcp']))
             logger.info(u"Initial test lcr: {:.2f}".format(self._results['initial_lcr']))
-            logger.info(u"Initial supervised error: {:.2f}".format(self._results['supervised_error'][0]))
 
             for i in tqdm.tqdm(range(i_iter, self._num_iter)):
                 data, target = self._dataset.train_ds.next_batch(self._batch_size)
@@ -401,18 +393,16 @@ class LadderNetworksExperiment(object):
                     # saver.save(sess, '{}/model.ckpt'.format(self._checkpoint_path), epoch_n)
 
                     if self._dataset.validation_ds:
-                        y_true, y_pred, s_error = sess.run(
-                            [self._y_true, self._y_pred, self._supervised_error], feed_dict=validation_dict
+                        y_true, y_pred = sess.run(
+                            [self._y_true, self._y_pred], feed_dict=validation_dict
                         )
-                        self._add_result(y_true, y_pred, s_error, 'validation')
+                        self._add_result(y_true, y_pred, 'validation')
                         logger.info(u"Epoch {} - Validation accuracy: {:.2f}"
                                     .format(epoch_n, self._results['validation_accuracy'][-1]))
                         logger.info(u"Epoch {} - Validation mcp: {:.2f}"
                                     .format(epoch_n, self._results['validation_mcp'][-1]))
                         logger.info(u"Epoch {} - Validation lcr: {:.2f}"
                                     .format(epoch_n, self._results['validation_lcr'][-1]))
-                        logger.info(u"Epoch {} - Validation supervised error: {:.2f}"
-                                    .format(epoch_n, self._results['supervised_error'][-1]))
 
                     logger.info(u"Selecting unannotated data for manual evaluation")
                     # selecting 10 random unannotated instances for classification and manual evaluation
@@ -426,12 +416,11 @@ class LadderNetworksExperiment(object):
                         zip(eval_sent, y_pred)
                     )
 
-            y_true, y_pred, s_error = sess.run(
-                [self._y_true, self._y_pred, self._supervised_error], feed_dict=test_dict
+            y_true, y_pred = sess.run(
+                [self._y_true, self._y_pred], feed_dict=test_dict
             )
-            self._add_result(y_true, y_pred, s_error, 'final')
+            self._add_result(y_true, y_pred, 'final')
             logger.info(u"Final test accuracy: {:.2f}".format(self._results['final_accuracy']))
             logger.info(u"Final test mcp: {:.2f}".format(self._results['final_mcp']))
             logger.info(u"Final test lcr: {:.2f}".format(self._results['final_lcr']))
-            logger.info(u"Final supervised error: {:.2f}".format(self._results['supervised_error'][-1]))
 
