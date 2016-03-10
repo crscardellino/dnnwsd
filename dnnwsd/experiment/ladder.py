@@ -433,6 +433,7 @@ class LadderNetworksExperiment(object):
                             u"Breaking at epoch {} - Validation accuracy is over validation threshold: {} >= {}"
                             .format(epoch_n, self._results['validation_accuracy'][-1], self._validation_threshold)
                         )
+                        break
 
             for dataset in ['train', 'test', 'validation']:
                 feed_dict = feed_dicts[dataset]
