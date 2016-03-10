@@ -276,7 +276,7 @@ class LadderNetworksExperiment(object):
                 # use ReLU activation in hidden layers
                 h = tf.nn.relu(z + self._weights["beta"][l-1])
 
-            self._keep_ratio = tf.placeholder("float")
+            self._keep_ratio = tf.placeholder(tf.float32)
             if self._dropout_ratio > 0 and noise_std > 0:  # add dropout layer for corrupted encoder to regularize
                 h = tf.nn.dropout(h, self._keep_ratio)
 
@@ -430,7 +430,7 @@ class LadderNetworksExperiment(object):
 
                     if self._results['validation_accuracy'][-1] >= self._validation_threshold:
                         logger.info(
-                            u"Breaking at epoch {} - Validation accuracy is over validation threshold: {} >= {}"
+                            u"Breaking at epoch {} - Validation accuracy over threshold: {:.02f} >= {:.02f}"
                             .format(epoch_n, self._results['validation_accuracy'][-1], self._validation_threshold)
                         )
                         break
