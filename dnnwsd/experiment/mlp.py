@@ -21,7 +21,7 @@ class MultilayerPerceptron(object):
     of a Ladder Network. Useful to check if we can overfit the training data.
     """
     def __init__(self, dataset_path, layers, epochs, starter_learning_rate, noise_std,
-                 train_ratio, test_ratio, validation_ratio):
+                 train_ratio=0.8, test_ratio=0.1, validation_ratio=0.1):
         if type(dataset_path) == str:
             dataset = DataSets(dataset_path, train_ratio, test_ratio, validation_ratio)
         elif type(dataset_path) == DataSets:
@@ -221,7 +221,7 @@ class MultilayerPerceptron(object):
                     self._results['train_error'].append(train_error)
                     logger.info(u"Initial train error: {:.2f}".format(self._results['train_error'][-1]))
 
-            for epoch in xrange(self._epochs):
+            for epoch in xrange(1, self._epochs + 1):
                 data, target = self._train_ds.next_batch(self._batch_size)
 
                 sess.run(self._train_step, feed_dict={
@@ -238,12 +238,17 @@ class MultilayerPerceptron(object):
 
                     self._results[dataset].append(accuracy_score(y_true, y_pred))
 
-                    logger.info(u"Epoch {} - {} accuracy: {:.2f}".format(epoch, dataset, self._results[dataset][-1]))
+                    if epoch > 1 and (epoch % 10) == 0:
+                        logger.info(
+                            u"Epoch {} - {} accuracy: {:.2f}".format(epoch, dataset, self._results[dataset][-1])
+                        )
 
-                    if dataset == 'train':
-                        train_error = sess.run(self._loss, feed_dict=feed_dict)
-                        self._results['train_error'].append(train_error)
-                        logger.info(u"Epoch {} - train error: {:.2f}".format(epoch, self._results['train_error'][-1]))
+                        if dataset == 'train':
+                            train_error = sess.run(self._loss, feed_dict=feed_dict)
+                            self._results['train_error'].append(train_error)
+                            logger.info(
+                                u"Epoch {} - train error: {:.2f}".format(epoch, self._results['train_error'][-1])
+                            )
 
             for dataset in ['train', 'test', 'validation']:
                 feed_dict = feed_dicts[dataset]
