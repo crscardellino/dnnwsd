@@ -17,8 +17,9 @@ logger = logging.getLogger(__name__)
 
 class LadderNetworksExperiment(object):
     def __init__(self, dataset_or_path, layers, denoising_cost, epochs=50,
-                 noise_std=0.3, starter_learning_rate=0.02, evaluation_amount=10,
+                 noise_std=0.3, starter_learning_rate=0.02, evaluation_amount=10, validation_threshold=0.75,
                  train_ratio=0.8, test_ratio=0.1, validation_ratio=0.1, dropout_ratio=0.0):
+        assert train_ratio > 0 and test_ratio > 0 and validation_ratio > 0  # We need the three sets
 
         if type(dataset_or_path) == str:
             self._dataset = DataSets(dataset_or_path, train_ratio, test_ratio, validation_ratio)
@@ -45,6 +46,7 @@ class LadderNetworksExperiment(object):
         self._noise_std = noise_std  # scaling factor for noise used in corrupted encoder
         self._denoising_cost = denoising_cost  # hyperparameters that denote the importance of each layer
         self._dropout_ratio = dropout_ratio
+        self._validation_threshold = validation_threshold
 
         # functions to join and split annotated and unannotated corpus
         self._join = lambda a, u: tf.concat(0, [a, u])
@@ -424,9 +426,13 @@ class LadderNetworksExperiment(object):
                     eval_data = self._dataset.train_ds.unannotated_ds.data[perm]
                     eval_sent = self._dataset.train_ds.unannotated_ds.target[perm]
                     y_pred = sess.run(self._y_pred, feed_dict={self._inputs: eval_data})
-                    self._evaluation_sentences.append(
-                        zip(eval_sent, y_pred)
-                    )
+                    self._evaluation_sentences.append(zip(eval_sent, y_pred))
+
+                    if self._results['validation_accuracy'][-1] >= self._validation_threshold:
+                        logger.info(
+                            u"Breaking at epoch {} - Validation accuracy is over validation threshold: {} >= {}"
+                            .format(epoch_n, self._results['validation_accuracy'][-1], self._validation_threshold)
+                        )
 
             for dataset in ['train', 'test', 'validation']:
                 feed_dict = feed_dicts[dataset]
