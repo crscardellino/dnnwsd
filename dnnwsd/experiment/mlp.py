@@ -118,7 +118,9 @@ class MultilayerPerceptron(object):
         self._running_mean = [tf.Variable(tf.constant(0.0, shape=[l]), trainable=False) for l in self._layers[1:]]
         self._running_var = [tf.Variable(tf.constant(1.0, shape=[l]), trainable=False) for l in self._layers[1:]]
 
-        h = self._inputs
+        noise_std = 0.3
+
+        h = self._inputs + tf.random_normal(tf.shape(self._inputs)) * noise_std
 
         for l in range(1, self._L+1):
             logger.info(u"Layer {}: {} -> {}".format(l, self._layers[l-1], self._layers[l]))
@@ -126,10 +128,12 @@ class MultilayerPerceptron(object):
             # pre-activation
             z_pre = tf.matmul(h, self._weights['W'][l-1])
 
-            # Clean encoder
             # batch normalization + update the average mean and variance
             # using batch mean and variance of annotated examples
-            z = self._update_batch_normalization(z_pre, l)
+            # z = self._update_batch_normalization(z_pre, l)
+            mean, var = tf.nn.moments(z_pre, axes=[0])
+            z = (z_pre - mean) / tf.sqrt(var + tf.constant(1e-10))
+            z += tf.random_normal(tf.shape(z_pre)) * noise_std
 
             if l == self._L:
                 # use softmax activation in output layer
