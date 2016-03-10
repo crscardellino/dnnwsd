@@ -6,7 +6,6 @@ import numpy as np
 import os
 import shutil
 import tensorflow as tf
-import tqdm
 
 from sklearn.metrics import accuracy_score
 from ..utils.dataset import DataSets
@@ -23,7 +22,12 @@ class MultilayerPerceptron(object):
     """
     def __init__(self, dataset_path, layers, epochs, starter_learning_rate, noise_std,
                  train_ratio, test_ratio, validation_ratio):
-        dataset = DataSets(dataset_path, train_ratio, test_ratio, validation_ratio)
+        if type(dataset_path) == str:
+            dataset = DataSets(dataset_path, train_ratio, test_ratio, validation_ratio)
+        elif type(dataset_path) == DataSets:
+            dataset = dataset_path
+        else:
+            raise Exception("The provided dataset is not valid")
 
         self._lemma = dataset.lemma
         self._train_ds = dataset.train_ds.annotated_ds
