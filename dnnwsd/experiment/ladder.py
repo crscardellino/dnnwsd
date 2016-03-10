@@ -400,7 +400,7 @@ class LadderNetworksExperiment(object):
                         logger.info(u"Epoch {} - {} accuracy: {:.2f}".format(
                                 epoch_n, dataset, self._results['{}_accuracy'.format(dataset)][-1])
                         )
-                        logger.info(u"Epoch {} - mcp: {:.2f}".format(
+                        logger.info(u"Epoch {} - {} mcp: {:.2f}".format(
                                 epoch_n, dataset, self._results['{}_mcp'.format(dataset)][-1])
                         )
                         logger.info(u"Epoch {} - {} lcr: {:.2f}".format(
