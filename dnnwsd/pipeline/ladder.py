@@ -80,8 +80,7 @@ def _write_results(results, evaluations, population_growths, labels, results_pat
         pg_mean = np.mean(np.array(population_growths), axis=0)
         for epoch, pg in enumerate(pg_mean):
             for idx, label in enumerate(labels):
-                f.write(u"{:02d},{},{:.0f}\n".format(epoch, label, pg_mean[idx]))
-
+                f.write(u"{:02d},{},{:.0f}\n".format(epoch, label, pg[idx]).encode("utf-8"))
 
 class LadderNetworksPipeline(object):
     _experiments = {
@@ -162,9 +161,7 @@ class LadderNetworksPipeline(object):
                                     u"{} -- {}".format(sense, raw_sentence)
                                 )
 
-                        population_growths.append([])  # repetition population growth
-                        for (epoch, pg) in enumerate(ladder_experiment.population_growth):
-                            population_growths.append(np.array(pg))
+                        population_growths.append(np.array(ladder_experiment.population_growth))  # repetition population growth
 
                 logger.info(u"Finished all the {} experiment repetitions".format(experiment_name))
 
