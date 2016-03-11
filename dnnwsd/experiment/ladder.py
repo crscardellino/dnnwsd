@@ -439,7 +439,7 @@ class LadderNetworksExperiment(object):
                     logger.info(u"Classifying selected examples for population growth")
                     uexamples = self._dataset.train_ds.unannotated_ds.data[self._population_growth_examples]
                     y_pred = sess.run(self._y_pred, feed_dict={self._inputs: uexamples})
-                    targets = Counter(np.hstack((self._dataset.train_ds.target, y_pred)))
+                    targets = Counter(np.hstack((self._dataset.train_ds.annotated_ds.target, y_pred)))
                     self._population_growth.append(np.array([targets[i] for i in sorted(targets)]))
 
                     # if self._results['validation_accuracy'][-1] >= self._validation_threshold\
