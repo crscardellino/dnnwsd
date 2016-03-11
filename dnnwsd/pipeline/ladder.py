@@ -82,6 +82,7 @@ def _write_results(results, evaluations, population_growths, labels, results_pat
             for idx, label in enumerate(labels):
                 f.write(u"{:02d},{},{:.0f}\n".format(epoch, label, pg[idx]).encode("utf-8"))
 
+
 class LadderNetworksPipeline(object):
     _experiments = {
         'bow': 'Bag of Words',
@@ -107,6 +108,8 @@ class LadderNetworksPipeline(object):
         self._train_ratio = kwargs.pop('train_ratio', 0.8)
         self._test_ratio = kwargs.pop('test_ratio', 0.1)
         self._validation_ratio = kwargs.pop('validation_ratio', 0.1)
+        self._evaluation_amount = kwargs.pop('evaluation_amount', 10)
+        self._population_growth_count = kwargs.pop('population_growth_count', 1000)
 
     def run(self):
         for dataset_index in self._dataset_indexes:
@@ -133,7 +136,9 @@ class LadderNetworksPipeline(object):
                         ladder_experiment = LadderNetworksExperiment(
                             dataset_path, layers, denoising_cost,
                             epochs=self._epochs, noise_std=self._noise_std,
-                            starter_learning_rate=self._starter_learning_rate, train_ratio=self._train_ratio,
+                            starter_learning_rate=self._starter_learning_rate,
+                            evaluation_amount=self._evaluation_amount,
+                            population_growth_count=self._population_growth_count, train_ratio=self._train_ratio,
                             test_ratio=self._test_ratio, validation_ratio=self._validation_ratio
                         )
 
