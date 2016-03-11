@@ -15,7 +15,7 @@ setup_logging()
 logger = logging.getLogger(__name__)
 
 
-def _write_results(results, evaluations, results_path):
+def _write_results(results, evaluations, population_growths, labels, results_path):
     if os.path.exists(results_path):
         shutil.rmtree(results_path)
 
@@ -76,6 +76,12 @@ def _write_results(results, evaluations, results_path):
 
                 f.write("\n\n")
 
+    with open(os.path.join(results_path, "population_growth"), "w") as f:
+        pg_mean = np.mean(np.array(population_growths), axis=0)
+        for epoch, pg in enumerate(pg_mean):
+            for idx, label in enumerate(labels):
+                f.write(u"{:02d},{},{:.0f}\n".format(epoch, label, pg_mean[idx]))
+
 
 class LadderNetworksPipeline(object):
     _experiments = {
@@ -115,6 +121,8 @@ class LadderNetworksPipeline(object):
 
                 results = []
                 evaluations = []
+                population_growths = []
+                labels = None
 
                 for repetition in xrange(self._repetitions):
                     logger.info(u"Running repetition {}".format(repetition + 1))
@@ -130,6 +138,9 @@ class LadderNetworksPipeline(object):
                             test_ratio=self._test_ratio, validation_ratio=self._validation_ratio
                         )
 
+                        if not labels:
+                            labels = ladder_experiment.dataset.labels
+
                         ladder_experiment.run()
 
                         logger.info(u"Finished experiments for repetition {} - {} experiment - lemma {}".format(
@@ -141,18 +152,22 @@ class LadderNetworksPipeline(object):
                         )
 
                         evaluations.append([])  # repetition evaluations
-                        for (eidx, epoch) in enumerate(ladder_experiment.evaluation_sentences):
+                        for (epoch, sentences) in enumerate(ladder_experiment.evaluation_sentences):
                             evaluations[repetition].append([])  # epoch evaluations
-                            for (eval_sent, y_pred) in epoch:
+                            for (eval_sent, y_pred) in sentences:
                                 raw_sentence = ladder_experiment.dataset[eval_sent]
                                 sense = ladder_experiment.dataset.labels[y_pred]
 
-                                evaluations[repetition][eidx].append(
+                                evaluations[repetition][epoch].append(
                                     u"{} -- {}".format(sense, raw_sentence)
                                 )
 
+                        population_growths.append([])  # repetition population growth
+                        for (epoch, pg) in enumerate(ladder_experiment.population_growth):
+                            population_growths.append(np.array(pg))
+
                 logger.info(u"Finished all the {} experiment repetitions".format(experiment_name))
 
-                _write_results(results, evaluations, results_path)
+                _write_results(results, evaluations, population_growths, labels, results_path)
 
             logger.info(u"Finished all the experiments for lemma {}".format(self._lemmas[dataset_index]))

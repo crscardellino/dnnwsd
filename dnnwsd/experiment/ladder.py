@@ -18,7 +18,7 @@ logger = logging.getLogger(__name__)
 class LadderNetworksExperiment(object):
     def __init__(self, dataset_or_path, layers, denoising_cost, epochs=50,
                  noise_std=0.3, starter_learning_rate=0.02, evaluation_amount=10, validation_threshold=0.75,
-                 train_ratio=0.8, test_ratio=0.1, validation_ratio=0.1):
+                 population_growth_count=1000, train_ratio=0.8, test_ratio=0.1, validation_ratio=0.1):
         assert train_ratio > 0 and test_ratio > 0 and validation_ratio > 0  # We need the three sets
 
         if type(dataset_or_path) == str:
@@ -111,6 +111,14 @@ class LadderNetworksExperiment(object):
         self._evaluation_amount = evaluation_amount
         self._evaluation_sentences = []
 
+        # population_growth
+        # we pick `population_growth_count` examples at random from the unlabeled corpus
+        # and use this to check on the population growth for each class
+        uperm = np.arange(self._dataset.train_ds.unannotated_ds.data_count)
+        np.random.shuffle(uperm)
+        self._population_growth_examples = uperm[:population_growth_count]
+        self._population_growth = []
+
         # train_step for the weight parameters, optimized with Adam
         self._learning_rate = tf.Variable(starter_learning_rate, trainable=False)
         self._train_step = tf.train.AdamOptimizer(self._learning_rate).minimize(self._loss)
@@ -131,6 +139,10 @@ class LadderNetworksExperiment(object):
     @property
     def dataset(self):
         return self._dataset
+
+    @property
+    def population_growth(self):
+        return self._population_growth
 
     def _add_result(self, y_true, y_pred, dataset):
         assert dataset in {'train', 'test', 'validation'}
@@ -424,12 +436,19 @@ class LadderNetworksExperiment(object):
                     y_pred = sess.run(self._y_pred, feed_dict={self._inputs: eval_data})
                     self._evaluation_sentences.append(zip(eval_sent, y_pred))
 
-                    if self._results['validation_accuracy'][-1] >= self._validation_threshold:
-                        logger.info(
-                            u"Breaking at epoch {} - Validation accuracy over threshold: {:.02f} >= {:.02f}"
-                            .format(epoch_n, self._results['validation_accuracy'][-1], self._validation_threshold)
-                        )
-                        break
+                    logger.info(u"Classifying selected examples for population growth")
+                    uexamples = self._dataset.train_ds.unannotated_ds.data[self._population_growth_examples]
+                    y_pred = sess.run(self._y_pred, feed_dict={self._inputs: uexamples})
+                    targets = Counter(np.hstack((self._dataset.train_ds.target, y_pred)))
+                    self._population_growth.append(np.array([targets[i] for i in sorted(targets)]))
+
+                    # if self._results['validation_accuracy'][-1] >= self._validation_threshold\
+                    #     and self._results['train_accuracy'][-1] > 0.95:
+                    #     logger.info(
+                    #         u"Breaking at epoch {} - Validation accuracy over threshold: {:.02f} >= {:.02f}"
+                    #         .format(epoch_n, self._results['validation_accuracy'][-1], self._validation_threshold)
+                    #     )
+                    #     break
 
             for dataset in ['train', 'test', 'validation']:
                 feed_dict = feed_dicts[dataset]
