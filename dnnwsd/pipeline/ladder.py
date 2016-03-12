@@ -119,7 +119,7 @@ class LadderNetworksPipeline(object):
                 logger.info(u"Running {} experiments".format(experiment_name))
 
                 dataset_path = os.path.join(self._dataset_directory, experiment, "{:03d}.p".format(dataset_index))
-                results_path = os.path.join(self._results_directory, experiment)
+                results_path = os.path.join(self._results_directory, "{:03d}".format(dataset_index), experiment)
 
                 results = []
                 evaluations = []
@@ -167,6 +167,9 @@ class LadderNetworksPipeline(object):
                                 )
 
                         population_growths.append(np.array(ladder_experiment.population_growth))  # repetition population growth
+
+                    del ladder_experiment
+                    del g
 
                 logger.info(u"Finished all the {} experiment repetitions".format(experiment_name))
 

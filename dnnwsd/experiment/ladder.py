@@ -469,3 +469,4 @@ class LadderNetworksExperiment(object):
                     dataset, self._results['{}_lcr'.format(dataset)][-1])
                 )
 
+        del sess
