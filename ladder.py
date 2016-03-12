@@ -15,7 +15,7 @@ DENOISING_COST = {
     'vec': [1000.0, 10.0, 0.1, 0.1, 0.1],
     'vecpos': [1000.0, 10.0, 0.1, 0.1, 0.1]
 }
-DATA_INDEXES = [2, 14, 26, 90, 139, 140]
+DATA_INDEXES = [int(sys.argv[1])]
 DATASET_DIRECTORY = "/home/ccardellino/datasets/dataset_corpus/es/7k/"
 LEMMAS_PATH = "/home/ccardellino/datasets/dataset_corpus/es/7k/lemmas"
 RESULTS_DIRECTORY = "results/"
