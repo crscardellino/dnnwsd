@@ -10,7 +10,6 @@ sys.path.append(path.abspath(path.dirname('../')))
 import cPickle as pickle
 import uuid
 import numpy as np
-import scipy.sparse as sp
 
 import gensim
 
@@ -44,7 +43,7 @@ for corpus_index, annotated_corpus in enumerate(annotated_corpus_directory_itera
 
     vec_processor.instances()
 
-    annotated_dataset = dict(data=sp.dok_matrix(vec_processor.dataset), target=vec_processor.target, labels=vec_processor.labels)
+    annotated_dataset = dict(data=vec_processor.dataset, target=vec_processor.target, labels=vec_processor.labels)
     sentences_ids = []
     unannotated_sentences = {}
 
@@ -61,7 +60,7 @@ for corpus_index, annotated_corpus in enumerate(annotated_corpus_directory_itera
         sentences_ids.append(sentence_id)
         unannotated_sentences[sentence_id] = raw_sentence
 
-    unannotated_dataset = dict(data=sp.dok_matrix(vec_processor.unannotated_dataset), sentences=np.array(sentences_ids))
+    unannotated_dataset = dict(data=vec_processor.unannotated_dataset, sentences=np.array(sentences_ids))
 
     lemma_dataset = dict(
         lemma=annotated_corpus.lemma,
