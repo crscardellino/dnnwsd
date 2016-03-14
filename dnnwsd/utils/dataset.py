@@ -1,9 +1,15 @@
 # -*- coding: utf-8 -*-
 
 import cPickle as pickle
+import logging
 import numpy as np
 
 from sklearn.cross_validation import train_test_split
+
+from setup_logging import setup_logging
+
+setup_logging()
+logger = logging.getLogger(__name__)
 
 
 class DataSet(object):
@@ -17,7 +23,10 @@ class DataSet(object):
     
     @property
     def data(self):
-        return self._data
+        if hasattr(self._data, 'todense'):
+            return self._data.todense()
+        else:
+            return self._data
 
     @property
     def target(self):
@@ -100,11 +109,13 @@ class DataSets(object):
     def __init__(self, dataset_path, train_ratio=0.8, test_ratio=0.2, validation_ratio=0):
         assert train_ratio + test_ratio + validation_ratio == 1, "Train, Test and Validation ratio don't sum 1"
 
+        logger.info(u"Loading the dataset in path {}".format(dataset_path))
         with open(dataset_path, "rb") as f:
             dataset = pickle.load(f)
 
         self._lemma = dataset['lemma']
         self._lemma_index = dataset['index']
+        self._labels = dataset['annotated_dataset']['labels']
         self._raw_unannotated_sentences = dataset['unannotated_sentences']
 
         annotated_data = dataset['annotated_dataset']['data']
@@ -112,12 +123,18 @@ class DataSets(object):
         unannotated_data = dataset['unannotated_dataset']['data']
         unannotated_target_sentences = dataset['unannotated_dataset']['sentences']
 
+        perm = np.arange(unannotated_data.shape[0])
+        np.random.shuffle(perm)
+        unannotated_data = unannotated_data[perm]
+        unannotated_target_sentences = unannotated_target_sentences[perm]
+
         if annotated_data.max() > 1 or unannotated_data.max() > 1:  # Normalize dataset
             max_value = max(annotated_data.max(), unannotated_data.max())
 
             annotated_data = np.multiply(annotated_data, 1.0 / max_value)
             unannotated_data = np.multiply(unannotated_data, 1.0 / max_value)
 
+        logger.info(u"Splitting dataset in subsets")
         tr_index, te_index, va_index = self.__split_data__(annotated_target, train_ratio, test_ratio, validation_ratio)
 
         self.train_ds = SemiDataSet(annotated_data[tr_index], annotated_target[tr_index],
@@ -140,6 +157,10 @@ class DataSets(object):
     @property
     def lemma_index(self):
         return self._lemma_index
+
+    @property
+    def labels(self):
+        return self._labels
 
     @staticmethod
     def __split_data__(target, train_ratio, test_ratio, validation_ratio):
