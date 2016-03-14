@@ -19,8 +19,8 @@ from dnnwsd.corpus import sensem, unannotated
 from dnnwsd.processor import bowprocessor
 
 annotated_corpus_directory = "../resources/sensem/"
-unannotated_corpus_directory = "../../wikicorpus/es/wikicorpus_lemmas_sample_15k/"
-corpus_datasets_dir = "../resources/corpus_datasets/es/15k/bow"
+unannotated_corpus_directory = "../../wikicorpus/es/wikicorpus_lemmas_sample_7k/"
+corpus_datasets_dir = "../resources/corpus_datasets/es/7k/bow"
 
 annotated_corpus_directory_iterator = sensem.SenSemCorpusDirectoryIterator(annotated_corpus_directory)
 unannotated_corpus_directory_iterator = unannotated.UnannotatedCorpusDirectoryIterator(unannotated_corpus_directory)
