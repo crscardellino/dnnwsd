@@ -34,7 +34,7 @@ pipeline = ladder.LadderNetworksPipeline(
     train_ratio=0.8,
     test_ratio=0.1,
     validation_ratio=0.1,
-    evaluation_amount=5,
+    evaluation_amount=10,
     population_growth_count=1000
 )
 

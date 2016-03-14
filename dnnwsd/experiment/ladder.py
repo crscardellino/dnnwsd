@@ -352,7 +352,8 @@ class LadderNetworksExperiment(object):
     def run(self):
         logger.info(u"Running session")
 
-        with tf.Session() as sess:
+        gpu_options = tf.GPUOptions(per_process_gpu_memory_fraction=0.5)
+        with tf.Session(config=tf.ConfigProto(gpu_options=gpu_options)) as sess:
             i_iter = 0
 
             init = tf.initialize_all_variables()
