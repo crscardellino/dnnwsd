@@ -16,8 +16,8 @@ DENOISING_COST = {
     'vecpos': [1000.0, 10.0, 0.1, 0.1, 0.1]
 }
 DATA_INDEXES = [int(sys.argv[1])]
-DATASET_DIRECTORY = "/home/ccardellino/datasets/dataset_corpus/es/7k/"
-LEMMAS_PATH = "/home/ccardellino/datasets/dataset_corpus/es/7k/lemmas"
+DATASET_DIRECTORY = "/home/ccardellino/datasets/dataset_corpus/en/7k/"
+LEMMAS_PATH = "/home/ccardellino/datasets/dataset_corpus/en/7k/lemmas"
 RESULTS_DIRECTORY = "results/"
 
 pipeline = ladder.LadderNetworksPipeline(

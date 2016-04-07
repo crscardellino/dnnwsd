@@ -85,7 +85,6 @@ def _write_results(results, evaluations, population_growths, labels, results_pat
 
 class LadderNetworksPipeline(object):
     _experiments = {
-        'bow': 'Bag of Words',
         'vec': 'Word Vectors',
         'vecpos': 'Word Vectors with PoS'
     }
