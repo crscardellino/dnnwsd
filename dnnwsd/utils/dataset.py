@@ -106,7 +106,8 @@ class SemiDataSet(object):
 
 
 class DataSets(object):
-    def __init__(self, dataset_path, train_ratio=0.8, test_ratio=0.2, validation_ratio=0):
+    def __init__(self, dataset_path, train_ratio=0.8, test_ratio=0.2, validation_ratio=0, shift_pos=False,
+                 word_vector_size=300, window=11):
         assert train_ratio + test_ratio + validation_ratio == 1, "Train, Test and Validation ratio don't sum 1"
 
         logger.info(u"Loading the dataset in path {}".format(dataset_path))
@@ -204,3 +205,23 @@ class DataSets(object):
                 np.hstack([init_va_index, va_index]).astype(np.int32)
                 )
 
+    @staticmethod
+    def shift_pos(dataset, word_vector_size, word_count):
+        whole_vector_size = dataset.shape[1]
+        all_words_size = word_vector_size * word_count
+        all_pos_size = whole_vector_size - all_words_size
+        pos_vector_size = all_pos_size / word_count
+        whole_word_size = word_vector_size + pos_vector_size
+
+        result = np.zeros(dataset.shape)
+
+        for i in xrange(dataset.shape[0]):
+            for it, j in enumerate(xrange(0, whole_vector_size, whole_word_size)):
+                word_start = j - it * pos_vector_size
+                word_end = word_start + word_vector_size
+                pos_start = all_words_size + it * pos_vector_size
+                pos_end = pos_start + pos_vector_size
+                result[i, j:j + word_vector_size] = dataset[i, word_start:word_end]
+                result[i, j + word_vector_size:j + whole_word_size] = dataset[i, pos_start:pos_end]
+
+        return result
