@@ -8,6 +8,7 @@ import shutil
 import tensorflow as tf
 
 from sklearn.metrics import accuracy_score
+from .base import NeuraNetworksExperiment
 from ..utils.dataset import DataSets
 from ..utils.setup_logging import setup_logging
 
