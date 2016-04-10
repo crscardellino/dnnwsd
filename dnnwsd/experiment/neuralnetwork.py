@@ -8,54 +8,35 @@ import shutil
 import tensorflow as tf
 
 from sklearn.metrics import accuracy_score
-from .base import NeuraNetworksExperiment
-from ..utils.dataset import DataSets
+from .base import NeuralNetworkExperiment
 from ..utils.setup_logging import setup_logging
+from ..utils.dataset import DataSets
 
 setup_logging()
 logger = logging.getLogger(__name__)
 
 
-class MultilayerPerceptron(object):
+class MultilayerPerceptron(NeuralNetworkExperiment):
     """
     Multilayer Perceptron experiments which emulates a clean encoder
     of a Ladder Network. Useful to check if we can overfit the training data.
     """
-    def __init__(self, dataset_path, layers, epochs, starter_learning_rate, noise_std,
+    def __init__(self, dataset_path_or_instance, layers, epochs, starter_learning_rate, noise_std,
                  train_ratio=0.8, test_ratio=0.1, validation_ratio=0.1):
-        if type(dataset_path) == str:
-            dataset = DataSets(dataset_path, train_ratio, test_ratio, validation_ratio)
-        elif type(dataset_path) == DataSets:
-            dataset = dataset_path
-        else:
-            raise Exception("The provided dataset is not valid")
-
-        self._lemma = dataset.lemma
-        self._train_ds = dataset.train_ds.annotated_ds
-        self._test_ds = dataset.test_ds
-        self._validation_ds = dataset.validation_ds
-
+        super(MultilayerPerceptron, self).__init__(dataset_path_or_instance, epochs, starter_learning_rate,
+                                                   train_ratio, test_ratio, validation_ratio)
         self._noise_std = noise_std
-
-        logger.info(u"Dataset for lemma {} loaded.".format(self._lemma))
-
-        self._input_size = self._train_ds.vector_length
-        self._output_size = self._train_ds.labels_count
 
         self._layers = layers
         self._layers.insert(0, self._input_size)
         self._layers.append(self._output_size)
         self._L = len(self._layers) - 1  # size of layers ignoring input layer
 
-        self._num_examples = self._train_ds.data_count
-        self._batch_size = self._train_ds.data_count
-        self._epochs = epochs
-
         # build network and return cost function
-        self._cost = self._build_netword()
+        self._cost = self.__build_network__()
 
         # define the y function as the classification function
-        self._y = self._mlp()
+        self._y = self.__build_classifier__()
 
         # loss
         self._loss = -tf.reduce_mean(tf.reduce_sum(self._outputs*tf.log(self._cost), 1))
@@ -64,15 +45,8 @@ class MultilayerPerceptron(object):
         self._y_true = tf.argmax(self._outputs, 1)
         self._y_pred = tf.argmax(self._y, 1)
 
-        self._results = dict(
-            train=[],
-            train_error=[],
-            test=[],
-            validation=[]
-        )
-
         # train_step for the weight parameters, optimized with Adam
-        self._learning_rate = tf.Variable(starter_learning_rate, trainable=False)
+        self._learning_rate = tf.Variable(self._starter_learning_rate, trainable=False)
         self._train_step = tf.train.AdamOptimizer(self._learning_rate).minimize(self._loss)
 
         # add the updates of batch normalization statistics to train_step
@@ -80,11 +54,7 @@ class MultilayerPerceptron(object):
         with tf.control_dependencies([self._train_step]):
             self._train_step = tf.group(bn_updates)
 
-    @property
-    def results(self):
-        return self._results
-
-    def _build_netword(self):
+    def __build_network__(self):
         logger.info(u"Building network")
         # input of the network (will be use to place the examples for training and classification)
         self._inputs = tf.placeholder(tf.float32, shape=(None, self._input_size))
@@ -153,7 +123,7 @@ class MultilayerPerceptron(object):
 
         return h
 
-    def _mlp(self):
+    def __build_classifier__(self):
         h = self._inputs
         for l in range(1, self._L+1):
             # pre-activation
@@ -256,6 +226,200 @@ class MultilayerPerceptron(object):
 
                 y_true, y_pred = sess.run(
                         [self._y_true, self._y_pred], feed_dict=feed_dict
+                )
+
+                self._results[dataset].append(accuracy_score(y_true, y_pred))
+
+                logger.info(u"Final {} accuracy: {:.2f}".format(dataset, self._results[dataset][-1]))
+
+                if dataset == 'train':
+                    train_error = sess.run(self._loss, feed_dict=feed_dict)
+                    self._results['train_error'].append(train_error)
+                    logger.info(u"Final train error: {:.2f}".format(self._results['train_error'][-1]))
+
+            if os.path.exists(results_path):
+                shutil.rmtree(results_path)
+
+            os.makedirs(results_path)
+
+            for dataset in ['train', 'test', 'validation']:
+                np.savetxt(
+                    os.path.join(results_path, dataset), np.array(self._results[dataset], dtype=np.float32), fmt="%.2f"
+                )
+
+            np.savetxt(
+                os.path.join(results_path, 'train_error'), np.array(self._results['train_error'], dtype=np.float32),
+                fmt="%.2f"
+            )
+
+
+class ConvolutionalNeuralNetwork(NeuralNetworkExperiment):
+    def __init__(self, dataset_path_or_instance, epochs, starter_learning_rate,
+                 train_ratio=0.8, test_ratio=0.1, validation_ratio=0.1,
+                 window_size=11, word_vector_size=300, filter_sizes=None, num_filters=64,
+                 l2_reg_lambda=0.01, shift_data=False):
+        super(ConvolutionalNeuralNetwork, self).__init__(dataset_path_or_instance, epochs, starter_learning_rate,
+                                                         train_ratio, test_ratio, validation_ratio)
+
+        self._window_size = window_size
+        self._word_vector_size = word_vector_size
+        self._whole_word_size = self._input_size / self._window_size
+        self._shift_data = shift_data
+        self._filter_sizes = filter_sizes if filter_sizes is not None else [2, 3, 4]
+        self._num_filters = num_filters
+        self._l2_reg_lambda = l2_reg_lambda
+
+        self.__build_network__()
+
+        # y_true and y_pred used to get the metrics
+        self._y_true = tf.argmax(self._outputs, 1)
+        self._y_pred = tf.argmax(self._scores, 1)
+
+        # train_step for the weight parameters, optimized with Adam
+        self._learning_rate = tf.Variable(self._starter_learning_rate, trainable=False)
+        self._train_step = tf.train.AdamOptimizer(self._learning_rate).minimize(self._loss)
+
+    def __build_network__(self):
+        # Placeholders for input, output and dropout
+        self._inputs = tf.placeholder(tf.float32, [None, self._window_size, self._whole_word_size], name="inputs")
+        self._expanded_inputs = tf.expand_dims(self._inputs, -1)
+        self._outputs = tf.placeholder(tf.float32, [None, self._output_size], name="outputs")
+        self._dropout_keep_prob = tf.placeholder(tf.float32, name="dropout_keep_prob")
+
+        # Keeping track of l2 regularization loss
+        l2_loss = tf.constant(0.0)
+
+        pooled_outputs = []
+        for i, filter_size in enumerate(self._filter_sizes):
+            with tf.name_scope("conv-maxpool-{}".format(filter_size)):
+                # Convolution Layer
+                filter_shape = [filter_size, self._whole_word_size, 1, self._num_filters]
+                W = tf.Variable(tf.truncated_normal(filter_shape, stddev=0.1), name="W")
+                b = tf.Variable(tf.constant(0.1, shape=[self._num_filters]), name="b")
+                conv = tf.nn.conv2d(
+                    self._expanded_inputs,
+                    W,
+                    strides=[1, 1, 1, 1],
+                    padding="VALID",
+                    name="conv"
+                )
+                # Apply nonlinearity
+                h = tf.nn.relu(tf.nn.bias_add(conv, b), name="relu")
+                # Maxpooling over the outputs
+                pooled = tf.nn.max_pool(
+                    h,
+                    ksize=[1, self._window_size - filter_size + 1, 1, 1],
+                    strides=[1, 1, 1, 1],
+                    padding='VALID',
+                    name="pool")
+                pooled_outputs.append(pooled)
+
+        # Combine all the pooled features
+        num_filters_total = self._num_filters * len(self._filter_sizes)
+        self._h_pool = tf.concat(3, pooled_outputs)
+        self._h_pool_flat = tf.reshape(self._h_pool, [-1, num_filters_total])
+
+        # Add dropout
+        with tf.name_scope("dropout"):
+            self._h_drop = tf.nn.dropout(self._h_pool_flat, self._dropout_keep_prob)
+
+        # Final (unnormalized) scores and predictions
+        with tf.name_scope("output"):
+            W = tf.Variable(tf.truncated_normal([num_filters_total, self._output_size], stddev=0.1), name="W")
+            b = tf.Variable(tf.constant(0.1, shape=[self._output_size]), name="b")
+            l2_loss += tf.nn.l2_loss(W)
+            l2_loss += tf.nn.l2_loss(b)
+            self._scores = tf.nn.xw_plus_b(self._h_drop, W, b, name="scores")
+
+        # CalculateMean cross-entropy loss
+        with tf.name_scope("loss"):
+            losses = tf.nn.softmax_cross_entropy_with_logits(self._scores, self._outputs)
+            self._loss = tf.reduce_mean(losses) + self._l2_reg_lambda * l2_loss
+
+    def _get_dataset(self, dataset):
+        if self._shift_data:
+            dataset = DataSets.shift_pos(dataset, self._word_vector_size, self._window_size)
+
+        return np.reshape(dataset, [dataset.shape[0], self._window_size, self._whole_word_size])
+
+    def run(self, results_path):
+        logger.info(u"Running session")
+
+        with tf.Session() as sess:
+            init = tf.initialize_all_variables()
+            sess.run(init)
+
+            feed_dicts = {
+                'train': {
+                    self._inputs: self._get_dataset(self._train_ds.data),
+                    self._outputs: self._train_ds.one_hot_labels,
+                    self._dropout_keep_prob: 0.5
+                },
+                'test': {
+                    self._inputs: self._get_dataset(self._test_ds.data),
+                    self._outputs: self._test_ds.one_hot_labels,
+                    self._dropout_keep_prob: 0.5
+                },
+                'validation': {
+                    self._inputs: self._get_dataset(self._validation_ds.data),
+                    self._outputs: self._validation_ds.one_hot_labels,
+                    self._dropout_keep_prob: 0.5
+                }
+            }
+
+            logger.info(u"Training start")
+
+            for dataset in ['train', 'test', 'validation']:
+                feed_dict = feed_dicts[dataset]
+
+                y_true, y_pred = sess.run(
+                    [self._y_true, self._y_pred], feed_dict=feed_dict
+                )
+
+                self._results[dataset].append(accuracy_score(y_true, y_pred))
+
+                logger.info(u"Initial {} accuracy: {:.2f}".format(dataset, self._results[dataset][-1]))
+
+                if dataset == 'train':
+                    train_error = sess.run(self._loss, feed_dict=feed_dict)
+                    self._results['train_error'].append(train_error)
+                    logger.info(u"Initial train error: {:.2f}".format(self._results['train_error'][-1]))
+
+            for epoch in xrange(1, self._epochs + 1):
+                data, target = self._train_ds.next_batch(self._batch_size)
+
+                sess.run(self._train_step, feed_dict={
+                    self._inputs: self._get_dataset(data),
+                    self._outputs: target,
+                    self._dropout_keep_prob: 0.5
+                })
+
+                for dataset in ['train', 'validation']:
+                    feed_dict = feed_dicts[dataset]
+
+                    y_true, y_pred = sess.run(
+                        [self._y_true, self._y_pred], feed_dict=feed_dict
+                    )
+
+                    self._results[dataset].append(accuracy_score(y_true, y_pred))
+
+                    if epoch > 1 and (epoch % 10) == 0:
+                        logger.info(
+                            u"Epoch {} - {} accuracy: {:.2f}".format(epoch, dataset, self._results[dataset][-1])
+                        )
+
+                        if dataset == 'train':
+                            train_error = sess.run(self._loss, feed_dict=feed_dict)
+                            self._results['train_error'].append(train_error)
+                            logger.info(
+                                u"Epoch {} - train error: {:.2f}".format(epoch, self._results['train_error'][-1])
+                            )
+
+            for dataset in ['train', 'test', 'validation']:
+                feed_dict = feed_dicts[dataset]
+
+                y_true, y_pred = sess.run(
+                    [self._y_true, self._y_pred], feed_dict=feed_dict
                 )
 
                 self._results[dataset].append(accuracy_score(y_true, y_pred))
