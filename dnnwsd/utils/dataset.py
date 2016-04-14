@@ -106,8 +106,7 @@ class SemiDataSet(object):
 
 
 class DataSets(object):
-    def __init__(self, dataset_path, train_ratio=0.8, test_ratio=0.2, validation_ratio=0, shift_pos=False,
-                 word_vector_size=300, window=11):
+    def __init__(self, dataset_path, train_ratio=0.8, test_ratio=0.2, validation_ratio=0):
         assert train_ratio + test_ratio + validation_ratio == 1, "Train, Test and Validation ratio don't sum 1"
 
         logger.info(u"Loading the dataset in path {}".format(dataset_path))

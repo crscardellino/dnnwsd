@@ -183,7 +183,7 @@ class MultilayerPerceptron(NeuralNetworkExperiment):
                         [self._y_true, self._y_pred], feed_dict=feed_dict
                 )
 
-                self._results[dataset].append(accuracy_score(y_true, y_pred))
+                self._add_result(y_true, y_pred, dataset)
 
                 logger.info(u"Initial {} accuracy: {:.2f}".format(dataset, self._results[dataset][-1]))
 
@@ -207,7 +207,11 @@ class MultilayerPerceptron(NeuralNetworkExperiment):
                             [self._y_true, self._y_pred], feed_dict=feed_dict
                     )
 
-                    self._results[dataset].append(accuracy_score(y_true, y_pred))
+                    self._add_result(y_true, y_pred, dataset)
+
+                    if dataset == 'train':
+                        train_error = sess.run(self._loss, feed_dict=feed_dict)
+                        self._results['train_error'].append(train_error)
 
                     if epoch > 1 and (epoch % 10) == 0:
                         logger.info(
@@ -215,8 +219,6 @@ class MultilayerPerceptron(NeuralNetworkExperiment):
                         )
 
                         if dataset == 'train':
-                            train_error = sess.run(self._loss, feed_dict=feed_dict)
-                            self._results['train_error'].append(train_error)
                             logger.info(
                                 u"Epoch {} - train error: {:.2f}".format(epoch, self._results['train_error'][-1])
                             )
@@ -228,7 +230,7 @@ class MultilayerPerceptron(NeuralNetworkExperiment):
                         [self._y_true, self._y_pred], feed_dict=feed_dict
                 )
 
-                self._results[dataset].append(accuracy_score(y_true, y_pred))
+                self._add_result(y_true, y_pred, dataset)
 
                 logger.info(u"Final {} accuracy: {:.2f}".format(dataset, self._results[dataset][-1]))
 
@@ -237,20 +239,7 @@ class MultilayerPerceptron(NeuralNetworkExperiment):
                     self._results['train_error'].append(train_error)
                     logger.info(u"Final train error: {:.2f}".format(self._results['train_error'][-1]))
 
-            if os.path.exists(results_path):
-                shutil.rmtree(results_path)
-
-            os.makedirs(results_path)
-
-            for dataset in ['train', 'test', 'validation']:
-                np.savetxt(
-                    os.path.join(results_path, dataset), np.array(self._results[dataset], dtype=np.float32), fmt="%.2f"
-                )
-
-            np.savetxt(
-                os.path.join(results_path, 'train_error'), np.array(self._results['train_error'], dtype=np.float32),
-                fmt="%.2f"
-            )
+            self.save_results(results_path)
 
 
 class ConvolutionalNeuralNetwork(NeuralNetworkExperiment):
@@ -376,7 +365,7 @@ class ConvolutionalNeuralNetwork(NeuralNetworkExperiment):
                     [self._y_true, self._y_pred], feed_dict=feed_dict
                 )
 
-                self._results[dataset].append(accuracy_score(y_true, y_pred))
+                self._add_result(y_true, y_pred, dataset)
 
                 logger.info(u"Initial {} accuracy: {:.2f}".format(dataset, self._results[dataset][-1]))
 
@@ -401,7 +390,11 @@ class ConvolutionalNeuralNetwork(NeuralNetworkExperiment):
                         [self._y_true, self._y_pred], feed_dict=feed_dict
                     )
 
-                    self._results[dataset].append(accuracy_score(y_true, y_pred))
+                    self._add_result(y_true, y_pred, dataset)
+
+                    if dataset == 'train':
+                        train_error = sess.run(self._loss, feed_dict=feed_dict)
+                        self._results['train_error'].append(train_error)
 
                     if epoch > 1 and (epoch % 10) == 0:
                         logger.info(
@@ -409,8 +402,6 @@ class ConvolutionalNeuralNetwork(NeuralNetworkExperiment):
                         )
 
                         if dataset == 'train':
-                            train_error = sess.run(self._loss, feed_dict=feed_dict)
-                            self._results['train_error'].append(train_error)
                             logger.info(
                                 u"Epoch {} - train error: {:.2f}".format(epoch, self._results['train_error'][-1])
                             )
@@ -422,7 +413,7 @@ class ConvolutionalNeuralNetwork(NeuralNetworkExperiment):
                     [self._y_true, self._y_pred], feed_dict=feed_dict
                 )
 
-                self._results[dataset].append(accuracy_score(y_true, y_pred))
+                self._add_result(y_true, y_pred, dataset)
 
                 logger.info(u"Final {} accuracy: {:.2f}".format(dataset, self._results[dataset][-1]))
 
@@ -431,17 +422,4 @@ class ConvolutionalNeuralNetwork(NeuralNetworkExperiment):
                     self._results['train_error'].append(train_error)
                     logger.info(u"Final train error: {:.2f}".format(self._results['train_error'][-1]))
 
-            if os.path.exists(results_path):
-                shutil.rmtree(results_path)
-
-            os.makedirs(results_path)
-
-            for dataset in ['train', 'test', 'validation']:
-                np.savetxt(
-                    os.path.join(results_path, dataset), np.array(self._results[dataset], dtype=np.float32), fmt="%.2f"
-                )
-
-            np.savetxt(
-                os.path.join(results_path, 'train_error'), np.array(self._results['train_error'], dtype=np.float32),
-                fmt="%.2f"
-            )
+            self.save_results(results_path)
