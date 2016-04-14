@@ -12,9 +12,32 @@ do
     scp crscardellino@172.18.0.249:Projects/dnnwsd/resources/corpus_datasets/es/7k/vecpos/${idx}.p /home/ccardellino/datasets/dataset_corpus/es/7k/vecpos/ &> /dev/null
 
     CUDA_VISIBLE_DEVICES=0 ./neuralnetworks.py $i vec cnn
+    if [ $? != 0 ]
+    then
+        echo "Index $idx didn't finish correctly for vec and cnn" 1>&2
+        exit 1
+    fi
+
     CUDA_VISIBLE_DEVICES=0 ./neuralnetworks.py $i vec mlp
+    if [ $? != 0 ]
+    then
+        echo "Index $idx didn't finish correctly for vec and mlp" 1>&2
+        exit 1
+    fi
+
     CUDA_VISIBLE_DEVICES=0 ./neuralnetworks.py $i vecpos cnn
+    if [ $? != 0 ]
+    then
+        echo "Index $idx didn't finish correctly for vecpos and cnn" 1>&2
+        exit 1
+    fi
+
     CUDA_VISIBLE_DEVICES=0 ./neuralnetworks.py $i vecpos mlp
+    if [ $? != 0 ]
+    then
+        echo "Index $idx didn't finish correctly for vecpos and mlp" 1>&2
+        exit 1
+    fi
 
     echo "Deleting the data (to save space)"
     rm -f /home/ccardellino/datasets/dataset_corpus/es/7k/vec/${idx}.p
