@@ -155,7 +155,7 @@ class MultilayerPerceptron(NeuralNetworkExperiment):
     def run(self, results_path):
         logger.info(u"Running session")
 
-        gpu_options = tf.GPUOptions(per_process_gpu_memory_fraction=0.3)
+        gpu_options = tf.GPUOptions(per_process_gpu_memory_fraction=0.5)
         with tf.Session(config=tf.ConfigProto(gpu_options=gpu_options)) as sess:
             init = tf.initialize_all_variables()
             sess.run(init)
@@ -337,7 +337,7 @@ class ConvolutionalNeuralNetwork(NeuralNetworkExperiment):
     def run(self, results_path):
         logger.info(u"Running session")
 
-        gpu_options = tf.GPUOptions(per_process_gpu_memory_fraction=0.3)
+        gpu_options = tf.GPUOptions(per_process_gpu_memory_fraction=0.5)
         with tf.Session(config=tf.ConfigProto(gpu_options=gpu_options)) as sess:
             init = tf.initialize_all_variables()
             sess.run(init)
