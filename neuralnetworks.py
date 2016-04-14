@@ -56,10 +56,10 @@ test_lcr = np.zeros((REPETITIONS, 2), dtype=np.float32)
 validation_lcr = np.zeros((REPETITIONS, EPOCHS + 2), dtype=np.float32)
 train_error = np.zeros((REPETITIONS, EPOCHS + 2), dtype=np.float32)
 
-rpath = path.join(RESULTS_DIRECTORY, FORMAT, EXPERIMENT)
+rpath = path.join(RESULTS_DIRECTORY, FORMAT, "{:03d}".format(DATA_INDEX), EXPERIMENT)
 
 for rep in xrange(REPETITIONS):
-    results_path = path.join(rpath, "repetition{}".format(rep), "{:03d}".format(DATA_INDEX))
+    results_path = path.join(rpath, "repetition{}".format(rep))
 
     with tf.Graph().as_default() as g:
         if EXPERIMENT == 'cnn':

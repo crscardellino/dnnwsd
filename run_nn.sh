@@ -23,5 +23,5 @@ do
     echo "=================="
     echo "Finished index $idx"
     echo "=================="
-    mv results/* resources/results/ladder/
+    mv results/* resources/results/neuralnetworks
 done
