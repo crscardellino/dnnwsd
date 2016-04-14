@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
 import sys
@@ -11,7 +12,7 @@ from dnnwsd.experiment import neuralnetwork
 from dnnwsd.utils import dataset
 
 # Dataset Configurations
-DATA_INDEX = sys.argv[1]
+DATA_INDEX = int(sys.argv[1])
 DATASET_DIRECTORY = "/home/ccardellino/datasets/dataset_corpus/es/7k/"
 RESULTS_DIRECTORY = "results/"
 

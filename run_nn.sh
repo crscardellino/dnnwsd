@@ -11,7 +11,7 @@ do
     scp crscardellino@172.18.0.249:Projects/dnnwsd/resources/corpus_datasets/es/7k/vec/${idx}.p /home/ccardellino/datasets/dataset_corpus/es/7k/vec/ &> /dev/null
     scp crscardellino@172.18.0.249:Projects/dnnwsd/resources/corpus_datasets/es/7k/vecpos/${idx}.p /home/ccardellino/datasets/dataset_corpus/es/7k/vecpos/ &> /dev/null
 
-    CUDA_VISIBLE_DEVICES=0 ./ladder.py $i
+    CUDA_VISIBLE_DEVICES=0 ./neuralnetworks.py $i
 
     echo "Deleting the data (to save space)"
     rm -f /home/ccardellino/datasets/dataset_corpus/es/7k/vec/${idx}.p
