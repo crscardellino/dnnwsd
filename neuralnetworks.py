@@ -4,6 +4,7 @@ import sys
 import numpy as np
 import os
 import shutil
+import tensorflow as tf
 
 from os import path
 from dnnwsd.experiment import neuralnetwork
@@ -59,28 +60,32 @@ for fmt in ['vec', 'vecpos']:
         for rep in xrange(REPETITIONS):
             results_path = path.join(rpath, "repetition{}".format(rep), "{:03d}".format(DATA_INDEX))
 
-            if exp == 'cnn':
-                experiment = neuralnetwork.ConvolutionalNeuralNetwork(
-                    dataset_path_or_instance=dataset_instance,
-                    epochs=EPOCHS,
-                    starter_learning_rate=STARTER_LEARNING_RATE,
-                    window_size=WINDOW_SIZE,
-                    word_vector_size=WORD_VECTOR_SIZE,
-                    filter_sizes=FILTER_SIZES,
-                    num_filters=NUM_FILTERS,
-                    l2_reg_lambda=L2_REG_LAMBDA,
-                    shift_data=False if fmt == "vec" else True
-                )
-            else:
-                experiment = neuralnetwork.MultilayerPerceptron(
-                    dataset_path_or_instance=dataset_instance,
-                    layers=LAYERS,
-                    epochs=EPOCHS,
-                    starter_learning_rate=STARTER_LEARNING_RATE,
-                    noise_std=NOISE_STD
-                )
+            with tf.Graph().as_default() as g:
+                if exp == 'cnn':
+                    experiment = neuralnetwork.ConvolutionalNeuralNetwork(
+                        dataset_path_or_instance=dataset_instance,
+                        epochs=EPOCHS,
+                        starter_learning_rate=STARTER_LEARNING_RATE,
+                        window_size=WINDOW_SIZE,
+                        word_vector_size=WORD_VECTOR_SIZE,
+                        filter_sizes=FILTER_SIZES,
+                        num_filters=NUM_FILTERS,
+                        l2_reg_lambda=L2_REG_LAMBDA,
+                        shift_data=False if fmt == "vec" else True
+                    )
+                else:
+                    experiment = neuralnetwork.MultilayerPerceptron(
+                        dataset_path_or_instance=dataset_instance,
+                        layers=LAYERS,
+                        epochs=EPOCHS,
+                        starter_learning_rate=STARTER_LEARNING_RATE,
+                        noise_std=NOISE_STD
+                    )
 
-            experiment.run(results_path)
+                experiment.run(results_path)
+
+            del experiment
+            del g
 
             train[rep, :] = np.loadtxt(path.join(results_path, "train"), dtype=np.float32)
             test[rep, :] = np.loadtxt(path.join(results_path, "test"), dtype=np.float32)

@@ -155,7 +155,8 @@ class MultilayerPerceptron(NeuralNetworkExperiment):
     def run(self, results_path):
         logger.info(u"Running session")
 
-        with tf.Session() as sess:
+        gpu_options = tf.GPUOptions(per_process_gpu_memory_fraction=0.3)
+        with tf.Session(config=tf.ConfigProto(gpu_options=gpu_options)) as sess:
             init = tf.initialize_all_variables()
             sess.run(init)
 
@@ -240,6 +241,8 @@ class MultilayerPerceptron(NeuralNetworkExperiment):
                     logger.info(u"Final train error: {:.2f}".format(self._results['train_error'][-1]))
 
             self.save_results(results_path)
+
+        del sess
 
 
 class ConvolutionalNeuralNetwork(NeuralNetworkExperiment):
@@ -334,7 +337,8 @@ class ConvolutionalNeuralNetwork(NeuralNetworkExperiment):
     def run(self, results_path):
         logger.info(u"Running session")
 
-        with tf.Session() as sess:
+        gpu_options = tf.GPUOptions(per_process_gpu_memory_fraction=0.3)
+        with tf.Session(config=tf.ConfigProto(gpu_options=gpu_options)) as sess:
             init = tf.initialize_all_variables()
             sess.run(init)
 
@@ -423,3 +427,5 @@ class ConvolutionalNeuralNetwork(NeuralNetworkExperiment):
                     logger.info(u"Final train error: {:.2f}".format(self._results['train_error'][-1]))
 
             self.save_results(results_path)
+
+        del sess
