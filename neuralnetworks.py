@@ -19,7 +19,7 @@ DATASET_DIRECTORY = "/home/ccardellino/datasets/dataset_corpus/es/7k/"
 RESULTS_DIRECTORY = "results/"
 
 # General Configurations
-REPETITIONS = 10
+REPETITIONS = 5
 EPOCHS = 100
 TRAIN_RATIO = 0.8
 TEST_RATIO = 0.1
@@ -56,7 +56,7 @@ test_lcr = np.zeros((REPETITIONS, 2), dtype=np.float32)
 validation_lcr = np.zeros((REPETITIONS, EPOCHS + 2), dtype=np.float32)
 train_error = np.zeros((REPETITIONS, EPOCHS + 2), dtype=np.float32)
 
-rpath = path.join(RESULTS_DIRECTORY, FORMAT, "{:03d}".format(DATA_INDEX), EXPERIMENT)
+rpath = path.join(RESULTS_DIRECTORY, "{:03d}".format(DATA_INDEX), FORMAT, EXPERIMENT)
 
 for rep in xrange(REPETITIONS):
     results_path = path.join(rpath, "repetition{}".format(rep))
@@ -101,7 +101,7 @@ for rep in xrange(REPETITIONS):
     validation_lcr[rep, :] = np.loadtxt(path.join(results_path, "validation_lcr"), dtype=np.float32)
     train_error[rep, :] = np.loadtxt(path.join(results_path, "train_error"), dtype=np.float32)
 
-rpath_mean = path.join(rpath, "mean", "{:03d}".format(DATA_INDEX))
+rpath_mean = path.join(rpath, "mean")
 if path.exists(rpath_mean):
     shutil.rmtree(rpath_mean)
 
